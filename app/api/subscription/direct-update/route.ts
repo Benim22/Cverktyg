@@ -5,7 +5,8 @@ import { cookies } from "next/headers"
 export async function POST(request: Request) {
   try {
     console.log("API-anrop: subscription/direct-update - start")
-    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     
     // Kontrollera autentisering
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()

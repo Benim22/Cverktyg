@@ -5,7 +5,8 @@ import { cookies } from "next/headers"
 export async function POST(request: Request) {
   try {
     console.log("API-anrop: subscription/update - start")
-    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     console.log("Supabase-klient skapad")
     
     // Försök hämta alla tabeller - hjälper att debugga databasanslutningsproblem
@@ -127,6 +128,8 @@ export async function POST(request: Request) {
       
       // Skapa uppdateringsobjekt med endast de fält som finns i tabellen
       const updateData: any = {
+        id: existingSubscription.id, // Nödvändig för upsert
+        user_id: userId, // Nödvändig för upsert
         plan,
         status: "active",
         updated_at: now.toISOString()
@@ -145,8 +148,7 @@ export async function POST(request: Request) {
       
       const { data: updatedSubscription, error: updateError } = await supabase
         .from("subscriptions")
-        .update(updateData)
-        .eq("user_id", userId)
+        .upsert(updateData)
         .select()
         .single()
       

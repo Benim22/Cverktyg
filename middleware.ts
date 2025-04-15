@@ -12,9 +12,13 @@ export async function middleware(req: NextRequest) {
 
   // Skyddade rutter som kräver inloggning
   const protectedRoutes = ['/dashboard', '/profile', '/settings']
-  const isProtectedRoute = protectedRoutes.some(route => 
-    req.nextUrl.pathname.startsWith(route)
-  )
+  
+  // Kontrollera routen
+  const path = req.nextUrl.pathname
+  
+  // Specialfall för preview med share-flagga
+  const isSharedRoute = path.startsWith('/shared')
+  const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route))
   
   // Om användaren försöker nå en skyddad route utan att vara inloggad
   if (isProtectedRoute && !session) {
@@ -24,7 +28,7 @@ export async function middleware(req: NextRequest) {
   }
   
   // Om användaren redan är inloggad och försöker nå auth-sidorna
-  if (session && (req.nextUrl.pathname.startsWith('/auth/signin') || req.nextUrl.pathname.startsWith('/auth/signup'))) {
+  if (session && (path.startsWith('/auth/signin') || path.startsWith('/auth/signup'))) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
   

@@ -224,8 +224,15 @@ export default function PricingPage() {
         plan: plan as SubscriptionPlan,
         status: "active" as SubscriptionStatus,
         is_lifetime: plan === "lifetime",
-        expires_at: expiresAt as string | undefined
       };
+      
+      // Lägg till utgångsdatum endast om det inte är null
+      if (expiresAt !== null) {
+        subscriptionData.expires_at = expiresAt;
+      } else {
+        // Om det är gratisplanen eller livstidsplanen, sätt utgångsdatum till undefined
+        subscriptionData.expires_at = undefined;
+      }
       
       // 1. Använd vår nya API-endpoint direkt
       try {
@@ -667,7 +674,7 @@ export default function PricingPage() {
                   billingInterval={billingInterval}
                   features={planData.free.features}
                   currentPlan={getCurrentPlan() === "free"}
-                  onSubscribe={() => {/* Ingen åtgärd för gratisplan */}}
+                  onSubscribe={() => handleSubscribe("free")}
                   isPopular={false}
                   planId="free"
                 />

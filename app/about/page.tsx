@@ -165,21 +165,28 @@ export default function AboutPage() {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    className="relative aspect-square overflow-hidden rounded-2xl shadow-xl"
+                    className="relative aspect-square overflow-hidden rounded-2xl bg-background/30 shadow-xl"
                   >
                     <Image 
-                      src="/images/about/vision.jpg" 
-                      alt="Vår vision" 
+                      src="/images/features/om1.png" 
+                      alt="Vår vision - Person med CV framför öppen dörr" 
                       fill
-                      className="object-cover"
+                      className="object-contain p-2"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute bottom-6 left-6 rounded-xl bg-white/90 p-4 backdrop-blur dark:bg-black/70">
-                      <LightbulbIcon className="h-8 w-8 text-primary" />
-                    </div>
                   </motion.div>
+                  <div className="mt-4 text-center text-sm text-muted-foreground">
+                    <p>Vi tror på kraften i ett väldesignat CV och hur det kan öppna dörrar till nya möjligheter.</p>
+                  </div>
                 </div>
+              </div>
+              
+              <div className="mt-12 flex justify-center">
+                <AnimatedButton asChild>
+                  <Link href="/editor/new" className="flex items-center gap-2">
+                    Skapa ditt CV nu <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </AnimatedButton>
               </div>
             </TabsContent>
             

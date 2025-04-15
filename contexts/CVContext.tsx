@@ -63,23 +63,85 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
   )
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
   const [isAutoSaving, setIsAutoSaving] = useState(false)
+  const [lastSavedCV, setLastSavedCV] = useState<CV | null>(null)
 
-  // Hämta användarinformation
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = getSupabaseClient()
-      const { data: { session } } = await supabase.auth.getSession()
+  // Spara CV till databasen funktion
+  const saveCVToDatabase = async () => {
+    try {
+      // Om vi har ett initialCV (preview), gör ingen databassparning
+      if (initialCV) {
+        return;
+      }
       
-      if (session) {
-        setUserId(session.user.id)
-      } else if (cvId) {
-        // Om användaren inte är inloggad och försöker redigera ett CV, omdirigera till login
-        router.push("/auth/signin")
+      // Om vi inte har något CV eller användar-ID, avbryt sparning
+      if (!currentCV || !userId) {
+        if (!userId) {
+          toast.error("Du måste vara inloggad för att spara ditt CV")
+        }
+        return
+      }
+      
+      // Skapa ett uppdateringsobjekt med CV-data
+      const cvUpdates = {
+        title: currentCV.title || "Nytt CV",
+        content: currentCV,
+        updated_at: new Date().toISOString()
+      }
+      
+      // Uppdatera CV:t i databasen
+      await updateCVInDB(currentCV.id, userId, cvUpdates)
+      
+      // Uppdatera den senast sparade versionen
+      setLastSavedCV(currentCV)
+      
+      // Uppdatera senaste sparningstiden
+      setLastSaveTime(new Date())
+      
+      return true
+    } catch (error) {
+      console.error("Error saving CV to database:", error)
+      toast.error("Kunde inte spara CV")
+      return false
+    }
+  }
+  
+  // Skapa autosparfunktionen med debounce - VIKTIGT: Detta måste vara deklarerat innan det används
+  const autoSave = createAutoSave(saveCVToDatabase, 2000)
+
+  // Hämta användarens session när komponenten laddas
+  useEffect(() => {
+    const getUserSession = async () => {
+      try {
+        setLoading(true)
+        const supabase = getSupabaseClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session) {
+          const { user } = session
+          setUserId(user.id)
+          
+          // Om vi har ett cvId, hämta det CV:t från databasen
+          if (cvId && !initialCV) {
+            await fetchCV(cvId, user.id)
+          }
+        } else {
+          // Ingen inloggad användare
+          setUserId(null)
+          
+          // Om vi har initialCV, använd det
+          if (initialCV) {
+            setCurrentCV(initialCV)
+          }
+        }
+      } catch (error) {
+        console.error("Error getting user session:", error)
+      } finally {
+        setLoading(false)
       }
     }
     
-    checkAuth()
-  }, [cvId, router])
+    getUserSession()
+  }, [cvId, initialCV])
 
   // Hämta CV-data om det är ett befintligt CV och inget initialCV redan skickats med
   useEffect(() => {
@@ -367,45 +429,21 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
     return (currentCV?.colorScheme && currentCV.colorScheme[key]) || DEFAULT_COLOR_SCHEME[key];
   }
 
-  // Skapa autosparfunktion
-  const saveCVToDatabase = async () => {
-    // Kontrollera om det är ett initialCV (preview) - i så fall avbryt
-    if (initialCV || !currentCV || !userId) return ""
-    
-    setIsAutoSaving(true)
-    try {
-      // Skapa rätt format för att spara till databasen
-      const cvUpdates = {
-        title: currentCV.title,
-        content: currentCV,
-        updated_at: new Date().toISOString()
+  // Lyssna efter ändringar i CV-data och autospara
+  useEffect(() => {
+    if (currentCV && userId && !loading && !initialCV) {
+      // Kolla om vi har genomfört ändringar sedan senaste sparningen
+      if (JSON.stringify(lastSavedCV) !== JSON.stringify(currentCV)) {
+        // Anropa autoSave 
+        autoSave.autoSave()
       }
-
-      // Anropa med korrekt parametrar: cvId, userId, dataobjekt
-      const { data, error } = await updateCVInDB(currentCV.id, userId, cvUpdates)
-      
-      if (error) {
-        console.error("Fel vid sparande av CV:", error)
-        return ""
-      }
-      
-      setLastSaveTime(new Date())
-      return currentCV.id
-    } catch (error) {
-      console.error("Fel vid sparande:", error)
-      return ""
-    } finally {
-      setIsAutoSaving(false)
     }
-  }
-  
-  // Skapa autosparfunktionen med debounce
-  const { autoSave } = createAutoSave(saveCVToDatabase, 2000)
+  }, [currentCV, userId, loading, lastSavedCV, initialCV])
   
   // Lyssna på ändringar i CV-data och spara automatiskt
   useEffect(() => {
     if (currentCV && userId && !loading && !initialCV) {
-      autoSave()
+      autoSave.autoSave()
     }
   }, [currentCV, userId, loading, initialCV])
 
@@ -424,15 +462,15 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
     // Använd samma funktion som autospar använder
     setIsAutoSaving(true)
     try {
-      const cvId = await saveCVToDatabase()
+      const result = await saveCVToDatabase()
       
-      if (cvId) {
+      if (result) {
         toast.success("CV sparat")
       } else {
         toast.error("Kunde inte spara CV")
       }
       
-      return cvId
+      return currentCV?.id || ""
     } catch (error) {
       console.error("Fel vid spara:", error)
       toast.error("Ett fel uppstod vid sparande")

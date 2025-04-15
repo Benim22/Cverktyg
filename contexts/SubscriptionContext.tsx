@@ -366,7 +366,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       
       console.log("Skapar/uppdaterar prenumeration för användare:", session.user.id)
       
-      // Använd API endpoint för att undvika RLS-problem
+      // Använd API endpoint - vi MÅSTE använda API:et för att kringgå RLS-restriktioner
       try {
         const response = await fetch("/api/subscription/update-subscription", {
           method: "POST",
@@ -384,102 +384,25 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
             console.log("Prenumeration uppdaterad via API:", data.subscription);
             setSubscription(data.subscription);
             return data.subscription;
+          } else {
+            console.error("Inget subscription-objekt returnerades från API");
+            return null;
           }
         } else {
-          console.error("API-fel:", await response.text());
+          const errorText = await response.text();
+          console.error("API-fel (HTTP " + response.status + "):", errorText);
+          return null;
         }
       } catch (apiError) {
         console.error("Kunde inte använda API:", apiError);
+        return null;
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Fallback till direkt databasfråga
-      const userId = session.user.id
-      const now = new Date().toISOString()
-      
-      // Kontrollera om användaren finns i users-tabellen med auth_id
-      let targetUserId = userId;
-      
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", userId)
-        .single();
-        
-      if (!userError && userData) {
-        console.log("Hittade användare med auth_id:", userData.id);
-        targetUserId = userData.id;
-      }
-      
-      // Kontrollera om användaren redan har en prenumeration
-      const { data: existingSubscription, error: fetchError } = await supabase
-        .from("subscriptions")
-        .select()
-        .eq("user_id", targetUserId)
-        .maybeSingle();
-      
-      let result: Subscription | null = null
-      
-      if (fetchError && fetchError.code !== "PGRST116") {
-        console.error("Fel vid kontroll av befintlig prenumeration:", fetchError)
-      }
-      
-      if (existingSubscription) {
-        // Uppdatera befintlig prenumeration
-        const updateData = {
-          ...planData,
-          updated_at: now
-        }
-        
-        const { data: updatedSub, error: updateError } = await supabase
-          .from("subscriptions")
-          .update(updateData)
-          .eq("user_id", targetUserId)
-          .select()
-          .maybeSingle();
-        
-        if (updateError) {
-          console.error("Fel vid uppdatering av prenumeration:", updateError)
-          return null
-        }
-        
-        result = updatedSub
-        console.log("Prenumeration uppdaterad:", updatedSub)
-      } else {
-        // Skapa ny prenumeration
-        const newSubscription = {
-          user_id: targetUserId,
-          plan: "free",
-          status: "active",
-          starts_at: now,
-          is_lifetime: false,
-          created_at: now,
-          updated_at: now,
-          ...planData
-        }
-        
-        const { data: createdSub, error: createError } = await supabase
-          .from("subscriptions")
-          .insert(newSubscription)
-          .select()
-          .maybeSingle();
-        
-        if (createError) {
-          console.error("Fel vid skapande av prenumeration:", createError)
-          return null
-        }
-        
-        result = createdSub
-        console.log("Ny prenumeration skapad:", createdSub)
-      }
-      
-      // Uppdatera context-state
-      setSubscription(result)
-      return result
     } catch (error) {
       console.error("Fel i createOrUpdateSubscription:", error)
-      return null
-    } finally {
-      setIsLoading(false)
+      setIsLoading(false);
+      return null;
     }
   }
 

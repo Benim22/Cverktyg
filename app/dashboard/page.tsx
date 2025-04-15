@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { getSupabaseClient, type CV, updateCV } from "@/lib/supabase-client"
+import { getSupabaseClient, type CV, updateCV, updateCVPublicStatus } from "@/lib/supabase-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageTransition } from "@/components/animations/PageTransition"
@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label"
 import { CVThumbnail } from "@/components/CVThumbnail"
 import { PaywallModal } from "@/components/PaywallModal"
 import { AppLayout } from "@/components/layout/AppLayout"
+import { ShareDialog } from "@/components/dialogs/ShareDialog"
 
 const MAX_FREE_CVS = 3
 
@@ -37,6 +38,8 @@ export default function DashboardPage() {
   const [newCVName, setNewCVName] = useState("")
   const { isFreePlan } = useSubscription()
   const [showPaywall, setShowPaywall] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [cvToShare, setCvToShare] = useState<{id: string, isPublic: boolean} | null>(null)
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -117,19 +120,26 @@ export default function DashboardPage() {
     setRenameDialogOpen(true)
   }
 
-  const handleShareCV = (cvId: string) => {
-    // Generera en delbar länk
-    const shareUrl = `${window.location.origin}/preview/${cvId}?share=true`
-    
-    // Kopiera länken till urklipp
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => {
-        toast.success("Delningslänk kopierad till urklipp!")
-      })
-      .catch((error) => {
-        console.error("Kunde inte kopiera till urklipp:", error)
-        toast.error("Kunde inte kopiera länk")
-      })
+  const handleShareCV = (cv: CV) => {
+    setCvToShare({
+      id: cv.id,
+      isPublic: cv.is_public || false
+    })
+    setShareDialogOpen(true)
+  }
+
+  // Uppdatera CV:s publika status
+  const handleCVStatusChange = (isPublic: boolean) => {
+    if (cvToShare) {
+      // Uppdatera den lokala listan med CV:n
+      setCvs(prevCVs => 
+        prevCVs.map(cv => 
+          cv.id === cvToShare.id 
+            ? { ...cv, is_public: isPublic } 
+            : cv
+        )
+      )
+    }
   }
 
   const handleRenameCV = async () => {
@@ -251,7 +261,7 @@ export default function DashboardPage() {
                         <Button 
                           variant="outline" 
                           size="icon"
-                          onClick={() => handleShareCV(cv.id)}
+                          onClick={() => handleShareCV(cv)}
                           title="Dela"
                         >
                           <Share2 className="h-4 w-4" />
@@ -325,6 +335,18 @@ export default function DashboardPage() {
         onClose={() => setShowPaywall(false)}
         type="cvLimit"
       />
+
+      {/* Share Dialog */}
+      {cvToShare && (
+        <ShareDialog 
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          cvId={cvToShare.id}
+          userId={user?.id}
+          isPublic={cvToShare.isPublic}
+          onStatusChange={handleCVStatusChange}
+        />
+      )}
     </AppLayout>
   )
 }

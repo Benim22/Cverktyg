@@ -17,15 +17,17 @@ import { Navbar } from "@/components/Navbar"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
   AlertCircle, Loader2, ShieldCheck, KeyRound, Mail, CreditCard, Trash2, 
-  DownloadCloud, LogOut, Languages, Sun, Moon, Laptop
+  DownloadCloud, LogOut, Languages, Sun, Moon, Laptop, Check
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { PageTransition } from "@/components/animations/PageTransition"
+import { useSubscription } from "@/contexts/SubscriptionContext"
 
 export default function SettingsPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
   const { theme, setTheme } = useTheme()
+  const { subscription, getUserPlan } = useSubscription()
   
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -36,7 +38,55 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [subscription, setSubscription] = useState<any>(null)
+  
+  // Hämta inkluderade funktioner baserat på prenumerationsplan
+  const getPlanFeatures = () => {
+    const plan = getUserPlan();
+    
+    // Basfunktioner som finns i alla planer
+    const baseFeatures = [
+      "Skapa upp till 3 CV:n",
+      "Tillgång till grundläggande mallar",
+      "Exportera till PDF"
+    ];
+    
+    // Ytterligare funktioner baserat på plan
+    switch (plan) {
+      case "premium":
+        return [
+          "Skapa obegränsat antal CV:n",
+          "Tillgång till alla premium-mallar",
+          "Export utan vattenstämpel",
+          "Anpassade färger och typsnitt",
+          "Prioriterad support",
+          "Avancerade statistikverktyg",
+          "CV-optimeringsverktyg",
+          "AI-baserade CV-rekommendationer"
+        ];
+      case "basic":
+        return [
+          "Skapa upp till 5 CV:n",
+          "Tillgång till standard-mallar",
+          "Export med diskret vattenstämpel",
+          "Anpassade färger och typsnitt",
+          "Standard support"
+        ];
+      case "lifetime":
+        return [
+          "Skapa obegränsat antal CV:n (för all framtid)",
+          "Tillgång till alla premium-mallar",
+          "Export utan vattenstämpel",
+          "Anpassade färger och typsnitt",
+          "VIP prioriterad support",
+          "Avancerade statistikverktyg",
+          "CV-optimeringsverktyg",
+          "AI-baserade CV-rekommendationer",
+          "Livstidsåtkomst till framtida funktioner"
+        ];
+      default:
+        return baseFeatures;
+    }
+  };
   
   useEffect(() => {
     const getProfile = async () => {
@@ -54,16 +104,7 @@ export default function SettingsPage() {
         setUser(session.user)
         setEmail(session.user.email || "")
         
-        // Hämta användarens prenumeration
-        const { data: subData, error: subError } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .single()
-        
-        if (!subError && subData) {
-          setSubscription(subData)
-        }
+        // Vi använder nu useSubscription istället för att hantera prenumerationen lokalt
         
       } catch (error) {
         console.error("Error loading settings:", error)
@@ -187,14 +228,14 @@ export default function SettingsPage() {
   }
   
   const getPlanName = () => {
-    if (!subscription) return "Gratisplan"
+    const plan = getUserPlan();
     
-    switch(subscription.plan) {
+    switch(plan) {
       case "free": return "Gratisplan"
       case "basic": return "Basplan"
       case "premium": return "Premiumplan"
-      case "pro": return "Proffspaketet"
-      default: return subscription.plan
+      case "lifetime": return "Lifetime"
+      default: return "Gratisplan"
     }
   }
   
@@ -513,17 +554,13 @@ export default function SettingsPage() {
                     
                     <div className="space-y-2">
                       <h4 className="font-medium">Inkluderade funktioner</h4>
-                      <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                        <li>Skapa upp till 3 CV:n</li>
-                        <li>Tillgång till grundläggande mallar</li>
-                        <li>Exportera till PDF</li>
-                        {subscription?.plan !== "free" && (
-                          <>
-                            <li>Anpassade färger och typsnitt</li>
-                            <li>Prioriterad support</li>
-                            <li>Avancerade mallar</li>
-                          </>
-                        )}
+                      <ul className="space-y-2 text-sm">
+                        {getPlanFeatures().map((feature, index) => (
+                          <li key={index} className="flex items-start">
+                            <Check className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </CardContent>

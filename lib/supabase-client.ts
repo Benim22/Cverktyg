@@ -136,6 +136,51 @@ export const getCV = async (cvId: string, userId: string) => {
 };
 
 /**
+ * Hämtar ett publikt CV utan att kräva användar-ID
+ * För användning med delningsfunktionen
+ */
+export const getPublicCV = async (cvId: string) => {
+  if (!cvId) {
+    return { 
+      data: null, 
+      error: new Error('CV-ID måste anges') 
+    };
+  }
+
+  try {
+    const supabase = getSupabaseClient();
+    
+    if (!supabase) {
+      console.error('Supabase-klienten kunde inte skapas');
+      return {
+        data: null,
+        error: new Error('Kunde inte ansluta till databasen')
+      };
+    }
+
+    // Hämta CV:t där id matchar och is_public är true
+    const response = await supabase
+      .from('cvs')
+      .select('*')
+      .eq('id', cvId)
+      .eq('is_public', true)
+      .single();
+    
+    if (response.error) {
+      console.error('Supabase query error:', response.error, 'Details:', JSON.stringify(response.error));
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Unexpected error in getPublicCV:', error, 'Details:', typeof error === 'object' ? JSON.stringify(error) : error);
+    return { 
+      data: null, 
+      error: error instanceof Error ? error : new Error('Ett oväntat fel uppstod vid hämtning av publikt CV') 
+    };
+  }
+};
+
+/**
  * Skapar ett nytt CV
  */
 export const createCV = async (userId: string, cvData: Partial<CV>) => {
@@ -162,16 +207,41 @@ export const createCV = async (userId: string, cvData: Partial<CV>) => {
  */
 export const updateCV = async (cvId: string, userId: string, cvData: Partial<CV>) => {
   const supabase = getSupabaseClient();
-  const updates = {
-    ...cvData,
-    updated_at: new Date().toISOString()
-  };
-  
   return await supabase
     .from('cvs')
-    .update(updates)
+    .update(cvData)
     .eq('id', cvId)
     .eq('user_id', userId);
+};
+
+/**
+ * Uppdaterar ett CV:s offentliga status
+ */
+export const updateCVPublicStatus = async (cvId: string, userId: string, isPublic: boolean) => {
+  try {
+    const supabase = getSupabaseClient();
+    
+    if (!cvId || !userId) {
+      return { 
+        data: null, 
+        error: new Error('CV-ID och användar-ID måste anges') 
+      };
+    }
+    
+    const response = await supabase
+      .from('cvs')
+      .update({ is_public: isPublic })
+      .eq('id', cvId)
+      .eq('user_id', userId);
+    
+    return response;
+  } catch (error) {
+    console.error('Error updating CV public status:', error);
+    return { 
+      data: null, 
+      error: error instanceof Error ? error : new Error('Ett fel uppstod vid uppdatering av CV:s delningsstatus') 
+    };
+  }
 };
 
 /**
