@@ -101,3 +101,110 @@
   box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
 }
 
+@layer components {
+  /* CV Mobile anpassningar */
+  .mobile-cv-container {
+    font-size: 14px;
+    height: auto;
+    min-height: 500px;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-cv-container {
+      font-size: inherit;
+      height: 842px;
+      max-height: 842px;
+    }
+  }
+  
+  /* CV mallen på mobila enheter */
+  .cv-preview-container {
+    --padding-mobile: 10px;
+    --font-size-mobile-name: 24px;
+    --font-size-mobile-title: 16px;
+    --font-size-mobile-heading: 18px;
+    --font-size-mobile-subheading: 14px;
+    --font-size-mobile-text: 12px;
+  }
+  
+  /* Optimera för mobila enheter */
+  @media (max-width: 640px) {
+    .cv-header-content {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .cv-contact-info {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .cv-daterange {
+      font-size: 10px;
+    }
+    
+    .cv-experience-header,
+    .cv-education-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .cv-section-title {
+      font-size: var(--font-size-mobile-heading) !important;
+    }
+    
+    .cv-name {
+      font-size: var(--font-size-mobile-name) !important;
+    }
+    
+    .cv-job-title {
+      font-size: var(--font-size-mobile-title) !important;
+    }
+    
+    .cv-skills-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Dölj scrollbar för Chrome, Safari och Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Dölj scrollbar för IE, Edge och Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* Lägg till dessa regler i slutet av filen */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-layout main {
+  flex: 1;
+}
+
+footer {
+  margin-top: auto;
+}
+

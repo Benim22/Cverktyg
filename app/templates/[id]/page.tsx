@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Navbar } from "@/components/Navbar"
 import { PageTransition } from "@/components/animations/PageTransition"
 import { CV_TEMPLATES } from "@/data/templates"
-import { CVTemplate } from "@/types/cv"
+import { CVTemplate, DEFAULT_COLOR_SCHEME } from "@/types/cv"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Eye, FileText, ArrowLeft, Loader2 } from "lucide-react"
@@ -18,6 +18,8 @@ import * as React from "react"
 import { createCV, getSupabaseClient } from "@/lib/supabase-client"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
+import { useSubscription } from "@/contexts/SubscriptionContext"
+import { PaywallModal } from "@/components/PaywallModal"
 
 interface PreviewPageProps {
   params: {
@@ -27,12 +29,22 @@ interface PreviewPageProps {
 
 export default function TemplatePreviewPage({ params }: PreviewPageProps) {
   const router = useRouter()
-  const resolvedParams = React.use(params) // Unwrap params med React.use()
+  // Använd React.use() för att packa upp params-objektet med explicit typning
+  const resolvedParams = React.use(params as unknown as Promise<{id: string}>)
   const { id } = resolvedParams
   const [template, setTemplate] = useState<CVTemplate | null>(null)
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const { isFreePlan } = useSubscription()
+  const [showPaywall, setShowPaywall] = useState(false)
+  
+  const MAX_FREE_CVS = 3
+
+  // Kontrollera om den aktuella mallen är en premium-mall
+  const isPremiumTemplate = (): boolean => {
+    return template?.isPremium === true;
+  }
 
   useEffect(() => {
     // Hitta mallen från CV_TEMPLATES
@@ -63,8 +75,8 @@ export default function TemplatePreviewPage({ params }: PreviewPageProps) {
   // Skapa en kopia av standardCV:t med den valda mallen
   const previewCV = {
     ...DEFAULT_CV,
-    templateId: template?.id,
-    colorScheme: template?.colorScheme
+    templateId: template?.id || "standard",
+    colorScheme: template?.colorScheme || DEFAULT_COLOR_SCHEME
   }
   
   // Hantera skapande av CV direkt från mallens förhandsgranskning
@@ -82,6 +94,30 @@ export default function TemplatePreviewPage({ params }: PreviewPageProps) {
     
     try {
       setCreating(true)
+      
+      // Kontrollera om användaren är på gratisplanen och redan har nått max antal CV:n
+      if (isFreePlan()) {
+        // Hämta användarens nuvarande antal CV:n
+        const supabase = getSupabaseClient()
+        const { data: userCVs, error: cvError } = await supabase
+          .from('cvs')
+          .select('id')
+          .eq('user_id', user.id)
+        
+        if (cvError) {
+          console.error("Fel vid hämtning av användarens CV:n:", cvError)
+          toast.error("Kunde inte kontrollera dina CV:n")
+          setCreating(false)
+          return
+        }
+        
+        if (userCVs && userCVs.length >= MAX_FREE_CVS) {
+          // Visa paywall-modalen istället för felmeddelandet
+          setCreating(false)
+          setShowPaywall(true)
+          return
+        }
+      }
       
       // Skapa tomt CV med bara grundstruktur och mall-inställningar
       const { data, error } = await createCV(user.id, {
@@ -148,7 +184,7 @@ export default function TemplatePreviewPage({ params }: PreviewPageProps) {
   }
   
   return (
-    <CVProvider> {/* Wrap i CVProvider för att useCV ska fungera */}
+    <CVProvider initialCV={previewCV}> {/* Skicka med previewCV som initialCV istället för att försöka hämta från databas */}
       <Navbar />
       <PageTransition>
         <div className="container py-10">
@@ -174,7 +210,7 @@ export default function TemplatePreviewPage({ params }: PreviewPageProps) {
               <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
                 <div className="w-full flex justify-center">
                   <div className="w-full max-w-3xl shadow-lg rounded-md overflow-hidden">
-                    <CVPreview cv={previewCV} />
+                    <CVPreview />
                   </div>
                 </div>
                 
@@ -217,38 +253,57 @@ export default function TemplatePreviewPage({ params }: PreviewPageProps) {
                     size="lg" 
                     className="w-full mt-6"
                     onClick={handleCreateCV}
-                    disabled={creating}
+                    disabled={creating || (isPremiumTemplate() && isFreePlan())}
                   >
                     {creating ? (
                       <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Skapar...
                       </>
                     ) : (
                       <>
-                        <FileText className="mr-2 h-5 w-5" />
-                        Använd denna mall
+                        <FileText className="mr-2 h-4 w-4" />
+                        Skapa CV med denna mall
                       </>
                     )}
                   </Button>
+                  
+                  <Link href="/templates/all" passHref>
+                    <Button variant="outline" size="lg" className="w-full">
+                      <Eye className="mr-2 h-4 w-4" />
+                      Se alla mallar
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </FadeIn>
           ) : (
-            <div className="py-10 text-center">
-              <h2 className="text-2xl font-semibold mb-4">Mallen kunde inte hittas</h2>
-              <p className="text-muted-foreground mb-6">
-                Mallen du söker finns inte eller har tagits bort.
+            <div className="text-center py-20">
+              <h2 className="text-2xl font-bold text-muted-foreground mb-4">
+                Kunde inte hitta mallen
+              </h2>
+              <p className="text-muted-foreground mb-8">
+                Den mall du söker finns inte eller har tagits bort.
               </p>
-              <Button asChild>
-                <Link href="/templates/all">
-                  Tillbaka till mallgalleriet
-                </Link>
-              </Button>
+              <Link href="/templates/all" passHref>
+                <Button>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Se alla tillgängliga mallar
+                </Button>
+              </Link>
             </div>
           )}
         </div>
       </PageTransition>
+      
+      {/* Paywall modal */}
+      <PaywallModal 
+        isOpen={showPaywall} 
+        onClose={() => setShowPaywall(false)} 
+        type="cvLimit"
+        title="Uppgradera för att skapa fler CV:n"
+        description={`Gratisversionen tillåter max ${MAX_FREE_CVS} CV:n. Uppgradera för att skapa fler och få tillgång till premiummallar.`}
+      />
     </CVProvider>
   )
 } 

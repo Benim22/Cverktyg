@@ -108,8 +108,8 @@ export function ProjectForm({ sectionId, items = [], isAdding = false }: Project
       
       // Skicka till AI-funktionen för förbättring
       const improvedDescription = await improveProjectText(
-        values.title,
-        values.role || '',
+        values.name,
+        "",
         values.description
       );
       
@@ -237,6 +237,10 @@ export function ProjectForm({ sectionId, items = [], isAdding = false }: Project
                       {...field}
                     />
                   </FormControl>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Tips: Beskriv teknikstacken (t.ex. React, Node.js), din roll i projektet, utmaningar du löste, och konkreta resultat.
+                    Exempel: "Utvecklade en webbapplikation med React och Firebase som effektiviserade kundhanteringsprocessen och minskade administrativ tid med 30%."
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

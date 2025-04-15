@@ -76,14 +76,21 @@ export async function improveExperienceText(
     ${description}
     
     Förbättra denna text genom att:
-    - Använda kraftfulla verbfraser
-    - Lyfta fram resultat och prestationer med siffror om möjligt
+    - Använda kraftfulla verbfraser i början av varje punkt
+    - Lyfta fram konkreta resultat och prestationer med siffror om möjligt
     - Använda branschrelevanta nyckelord
+    - Strukturera texten som tydliga punkter (en mening per punkt)
     - Behålla det väsentliga innehållet men göra det mer professionellt
-    - Begränsa till max 5-6 punkter eller kortare stycken
+    - Begränsa till max 4-5 tydliga punkter
     
-    Ge ENDAST den förbättrade texten som svar, utan några förklaringar eller inledningar.
+    VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. exakta siffror, teknologier):
+    - Lämna INTE platshållare som [Specificera X]
+    - Skriv istället texten så att den fungerar utan den specifika informationen
+    - Undvik att nämna specifika teknologier om de inte redan fanns i originaltexten
+    
+    Ge texten i form av tydliga punkter där varje punkt börjar med en kraftfull verbfras.
     Behåll originalspråket (svenska eller engelska).
+    Använd en tydlig punktlista där varje punkt är på en egen rad med en tom rad mellan dem.
     `
 
     const result = await model.generateContent({
@@ -95,13 +102,30 @@ export async function improveExperienceText(
         ]
       }],
       generationConfig: {
-        temperature: 0.5,
+        temperature: 0.4,
         maxOutputTokens: 800
       }
     })
 
     const response = result.response
-    return response.text().trim()
+    // Bearbeta svaret för att säkerställa att punkter hamnar på separata rader
+    let formattedText = response.text().trim()
+    
+    // Normalisera olika typer av punktlistor
+    formattedText = formattedText.replace(/^[•\-\*]\s+/gm, "• ")
+    
+    // Säkerställ att varje punkt börjar på en ny rad
+    formattedText = formattedText.replace(/([.!?])\s+([•\-\*])/g, "$1\n\n$2")
+    
+    // Om punkter saknas, försök identifiera meningar och formatera dem som punkter
+    if (!formattedText.includes("•")) {
+      formattedText = formattedText.replace(/([.!?])\s+(?=[A-ZÅÄÖ])/g, "$1\n\n• ")
+      if (!formattedText.startsWith("•")) {
+        formattedText = "• " + formattedText
+      }
+    }
+    
+    return formattedText
 
   } catch (error) {
     console.error("Fel vid förbättring av erfarenhetstext:", error)
@@ -140,13 +164,20 @@ export async function improveEducationText(
     
     Förbättra denna text genom att:
     - Betona relevanta kurser och kunskaper
-    - Nämna eventuella prestationer eller utmärkelser
-    - Lyfta fram relevanta projektarbeten
-    - Göra det mer fokuserat på uppnådda färdigheter
-    - Begränsa till max 4-5 punkter eller kortare stycken
+    - Lyfta fram eventuella prestationer eller utmärkelser
+    - Strukturera texten som tydliga punkter (en mening per punkt)
+    - Börja varje punkt med en aktiv verbfras
+    - Fokusera på uppnådda färdigheter och relevanta projekt
+    - Begränsa till max 3-4 tydliga punkter
     
-    Ge ENDAST den förbättrade texten som svar, utan några förklaringar eller inledningar.
+    VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. exakta kurser, projekt):
+    - Lämna INTE platshållare som [Specificera X]
+    - Skriv istället texten så att den fungerar utan den specifika informationen
+    - Undvik att hitta på kurser eller projekt som inte nämndes i originaltexten
+    
+    Ge texten i form av tydliga punkter där varje punkt börjar med en aktiv verbfras.
     Behåll originalspråket (svenska eller engelska).
+    Använd en tydlig punktlista där varje punkt är på en egen rad med en tom rad mellan dem.
     `
 
     const result = await model.generateContent({
@@ -158,13 +189,30 @@ export async function improveEducationText(
         ]
       }],
       generationConfig: {
-        temperature: 0.5,
+        temperature: 0.4,
         maxOutputTokens: 800
       }
     })
 
     const response = result.response
-    return response.text().trim()
+    // Bearbeta svaret för att säkerställa att punkter hamnar på separata rader
+    let formattedText = response.text().trim()
+    
+    // Normalisera olika typer av punktlistor
+    formattedText = formattedText.replace(/^[•\-\*]\s+/gm, "• ")
+    
+    // Säkerställ att varje punkt börjar på en ny rad
+    formattedText = formattedText.replace(/([.!?])\s+([•\-\*])/g, "$1\n\n$2")
+    
+    // Om punkter saknas, försök identifiera meningar och formatera dem som punkter
+    if (!formattedText.includes("•")) {
+      formattedText = formattedText.replace(/([.!?])\s+(?=[A-ZÅÄÖ])/g, "$1\n\n• ")
+      if (!formattedText.startsWith("•")) {
+        formattedText = "• " + formattedText
+      }
+    }
+    
+    return formattedText
 
   } catch (error) {
     console.error("Fel vid förbättring av utbildningstext:", error)
@@ -201,13 +249,18 @@ export async function improveSummary(
     
     Förbättra denna sammanfattning genom att:
     - Göra den mer koncis och professionell men personlig
-    - Betona nyckelkompetenser och styrkor
-    - Lyfta fram karriärmål och värderingar
-    - Använda branschrelevant terminologi
+    - Betona konkreta nyckelkompetenser och styrkor
+    - Använda branschrelevant terminologi (ENDAST om den nämns i originaltexten)
     - Skapa en stark inledning som fångar uppmärksamhet
-    - Begränsa till max 2-3 korta stycken
+    - Begränsa till 2-3 korta stycken (5-6 meningar totalt)
+    - Undvika klichéer och tomma fraser (som "driven" eller "passionerad")
     
-    Ge ENDAST den förbättrade texten som svar, utan några förklaringar eller inledningar.
+    VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. specifika färdigheter, teknologier):
+    - Lämna INTE platshållare som [Specificera X]
+    - Skriv istället texten så att den fungerar utan den specifika informationen
+    - Undvik att hitta på kompetenser eller erfarenheter som inte nämndes i originaltexten
+    
+    Ge en sammanhängande text i korta stycken som flyter naturligt. Använd radbrytningar mellan styckena.
     Behåll originalspråket (svenska eller engelska).
     `
 
@@ -220,13 +273,19 @@ export async function improveSummary(
         ]
       }],
       generationConfig: {
-        temperature: 0.5,
+        temperature: 0.4,
         maxOutputTokens: 800
       }
     })
 
     const response = result.response
-    return response.text().trim()
+    // Bearbeta svaret för att säkerställa att stycken hamnar på separata rader
+    let formattedText = response.text().trim()
+    
+    // Säkerställ radbrytningar mellan stycken
+    formattedText = formattedText.replace(/([.!?])\s+([A-ZÅÄÖ])/g, "$1\n\n$2");
+    
+    return formattedText
 
   } catch (error) {
     console.error("Fel vid förbättring av sammanfattning:", error)
@@ -262,14 +321,22 @@ export async function improveProjectText(
     ${description}
     
     Förbättra denna beskrivning genom att:
-    - Betona uppnådda resultat och ditt specifika bidrag
-    - Inkludera tekniker/metoder som användes
-    - Lyfta fram eventuella utmaningar som övervunnits
-    - Framhäva positiv påverkan på organisationen eller kunder
-    - Begränsa till max 4-5 punkter eller kortare stycken
+    - Betona konkreta resultat och specifika bidrag
+    - Inkludera tekniker/metoder som används (ENDAST om de nämns i originaltexten)
+    - Strukturera texten som tydliga punkter (en mening per punkt)
+    - Börja varje punkt med en kraftfull verbfras
+    - Lyfta fram utmaningar som övervunnits och lösningar
+    - Framhäva positiv påverkan
+    - Begränsa till max 3-4 tydliga punkter
     
-    Ge ENDAST den förbättrade texten som svar, utan några förklaringar eller inledningar.
+    VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. tekniker, resultat):
+    - Lämna INTE platshållare som [Specificera X]
+    - Skriv istället texten så att den fungerar utan den specifika informationen
+    - Undvik att hitta på tekniker eller specifika mätvärden som inte nämndes i originaltexten
+    
+    Ge texten i form av tydliga punkter där varje punkt börjar med en kraftfull verbfras.
     Behåll originalspråket (svenska eller engelska).
+    Använd en tydlig punktlista där varje punkt är på en egen rad med en tom rad mellan dem.
     `
 
     const result = await model.generateContent({
@@ -281,13 +348,30 @@ export async function improveProjectText(
         ]
       }],
       generationConfig: {
-        temperature: 0.5,
+        temperature: 0.4,
         maxOutputTokens: 800
       }
     })
 
     const response = result.response
-    return response.text().trim()
+    // Bearbeta svaret för att säkerställa att punkter hamnar på separata rader
+    let formattedText = response.text().trim()
+    
+    // Normalisera olika typer av punktlistor
+    formattedText = formattedText.replace(/^[•\-\*]\s+/gm, "• ")
+    
+    // Säkerställ att varje punkt börjar på en ny rad
+    formattedText = formattedText.replace(/([.!?])\s+([•\-\*])/g, "$1\n\n$2")
+    
+    // Om punkter saknas, försök identifiera meningar och formatera dem som punkter
+    if (!formattedText.includes("•")) {
+      formattedText = formattedText.replace(/([.!?])\s+(?=[A-ZÅÄÖ])/g, "$1\n\n• ")
+      if (!formattedText.startsWith("•")) {
+        formattedText = "• " + formattedText
+      }
+    }
+    
+    return formattedText
 
   } catch (error) {
     console.error("Fel vid förbättring av projektbeskrivning:", error)

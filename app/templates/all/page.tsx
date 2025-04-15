@@ -1,9 +1,10 @@
 "use client"
 
 import { Navbar } from "@/components/Navbar"
+import { MetaTags } from "@/components/MetaTags"
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, FileText, Loader2 } from "lucide-react"
+import { Eye, FileText, Loader2, SparklesIcon, LockIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { PageTransition } from "@/components/animations/PageTransition"
@@ -19,6 +20,8 @@ import { createCV, getSupabaseClient } from "@/lib/supabase-client"
 import { v4 as uuidv4 } from "uuid"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useSubscription } from "@/contexts/SubscriptionContext"
+import { Badge } from "@/components/ui/badge"
 
 // Kategori-mapping för mallar
 const templateCategories = {
@@ -32,6 +35,12 @@ const templateCategories = {
 export default function TemplatesPage() {
   return (
     <>
+      <MetaTags 
+        title="CV-mallar - Hitta den perfekta mallen för din karriär"
+        description="Utforska vårt bibliotek av professionellt designade CV-mallar för alla branscher. Skapa ett imponerande CV som hjälper dig att sticka ut bland andra sökande."
+        keywords="cv-mallar, cv-designer, professionella cv-mallar, moderna cv-mallar, kreativa cv-mallar, akademiska cv-mallar, tekniska cv-mallar"
+        ogUrl="https://cverktyg.se/templates/all"
+      />
       <Navbar />
       <PageTransition>
         <div className="container py-10">
@@ -102,10 +111,19 @@ function TemplateCard({ template }: { template: (typeof CV_TEMPLATES)[0] }) {
   const [imageError, setImageError] = useState(false)
   const [creating, setCreating] = useState(false)
   const router = useRouter()
+  const { isPremiumPlan } = useSubscription()
+  const hasPremiumAccess = isPremiumPlan()
+  const isPremiumTemplate = template.isPremium === true
 
   // Funktion för att skapa ett nytt CV med den valda mallen
   const handleCreateCV = async () => {
     try {
+      // Kontrollera om användaren försöker använda en premium-mall utan åtkomst
+      if (isPremiumTemplate && !hasPremiumAccess) {
+        toast.error("Denna mall kräver en premium-prenumeration")
+        return
+      }
+      
       setCreating(true)
       
       // Kontrollera användarens autentiseringsstatus
@@ -349,13 +367,34 @@ function TemplateCard({ template }: { template: (typeof CV_TEMPLATES)[0] }) {
   return (
     <AnimatedCard className="overflow-hidden">
       <div className="aspect-[3/4] w-full overflow-hidden bg-secondary/30 relative">
+        {/* Premium-badge */}
+        {isPremiumTemplate && (
+          <div className="absolute top-2 right-2 z-10">
+            <Badge className="bg-gradient-to-r from-amber-200 to-yellow-400 text-amber-900 border-amber-400">
+              <SparklesIcon className="h-3 w-3 mr-1" />
+              Premium
+            </Badge>
+          </div>
+        )}
+      
+        {/* Låsoverlay för premium-mallar */}
+        {isPremiumTemplate && !hasPremiumAccess && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+            <LockIcon className="h-10 w-10 text-white/90 mb-2" />
+            <p className="text-white text-center font-medium">Premium-mall</p>
+            <p className="text-white/80 text-center text-xs px-4 mt-1">
+              Kräver prenumeration
+            </p>
+          </div>
+        )}
+        
         {template.previewImage && !imageError ? (
           <Image
             src={template.previewImage}
             alt={template.name}
             width={300}
             height={400}
-            className="h-full w-full object-cover transition-transform hover:scale-105"
+            className={`h-full w-full object-cover transition-transform hover:scale-105 ${isPremiumTemplate && !hasPremiumAccess ? "blur-sm" : ""}`}
             onError={() => setImageError(true)}
           />
         ) : (
@@ -365,21 +404,39 @@ function TemplateCard({ template }: { template: (typeof CV_TEMPLATES)[0] }) {
         )}
       </div>
       <CardHeader>
-        <CardTitle>{template.name}</CardTitle>
+        <CardTitle className="flex items-center">
+          {template.name}
+          {isPremiumTemplate && (
+            <SparklesIcon className="h-4 w-4 ml-2 text-amber-500" />
+          )}
+        </CardTitle>
         <CardDescription>{template.description}</CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">
-        <AnimatedButton variant="outline" asChild>
+        <AnimatedButton 
+          variant="outline" 
+          asChild
+          className="px-4 py-2"
+        >
           <Link href={`/templates/${template.id}`}>
             <Eye className="mr-2 h-4 w-4" />
             Förhandsgranska
           </Link>
         </AnimatedButton>
-        <AnimatedButton onClick={handleCreateCV} disabled={creating}>
+        <AnimatedButton 
+          onClick={handleCreateCV} 
+          disabled={creating || (isPremiumTemplate && !hasPremiumAccess)}
+          className="px-4 py-2"
+        >
           {creating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Skapar...
+            </>
+          ) : isPremiumTemplate && !hasPremiumAccess ? (
+            <>
+              <LockIcon className="mr-2 h-4 w-4" />
+              Premium
             </>
           ) : (
             <>

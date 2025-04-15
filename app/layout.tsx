@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "sonner"
+import { Toaster } from "@/components/ui/toaster"
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext"
 
 const inter = Inter({
@@ -14,7 +14,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "CVerktyg - Skapa professionella CV:n enkelt",
   description: "Skapa, redigera och exportera professionella CV:n med CVerktyg",
-    generator: 'v0.dev'
+  generator: 'CVerktyg'
 }
 
 export default function RootLayout({
@@ -27,8 +27,8 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <SubscriptionProvider>
-            <main className="min-h-screen bg-background">{children}</main>
-            <Toaster position="top-right" />
+            {children}
+            <Toaster />
           </SubscriptionProvider>
         </ThemeProvider>
       </body>

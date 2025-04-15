@@ -28,12 +28,12 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
   } : {})
 
   return (
-    <div className="h-full p-8">
+    <div className="h-full p-4 sm:p-8">
       {/* Header med personuppgifter */}
-      <div className="border-b border-gray-200 pb-6">
-        <div className="flex items-start gap-4">
+      <div className="border-b border-gray-200 pb-4 sm:pb-6">
+        <div className="flex items-start gap-2 sm:gap-4 cv-header-content">
           {profileImage && profileImage.url && (
-            <div className="hidden shrink-0 sm:block">
+            <div className="shrink-0">
               <div 
                 className="relative"
                 style={profileImage.isTransparent ? transparentBgStyle : {}}
@@ -41,7 +41,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
                 <img 
                   src={profileImage.url} 
                   alt={`${personalInfo.firstName} ${personalInfo.lastName}`}
-                  className={`h-16 w-16 object-cover ${profileImageClass || ''}`}
+                  className={`h-12 w-12 sm:h-16 sm:w-16 object-cover ${profileImageClass || ''}`}
                   style={imageStyle}
                 />
               </div>
@@ -50,13 +50,13 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
           
           <div className="flex-1">
             <h1 
-              className="text-3xl font-bold"
+              className="text-2xl sm:text-3xl font-bold cv-name"
               style={{ color: getColorValue("primaryColor") }}
             >
               {personalInfo.firstName} {personalInfo.lastName}
             </h1>
             <p 
-              className="mt-1 text-xl"
+              className="mt-1 text-base sm:text-xl cv-job-title"
               style={{ color: getColorValue("secondaryColor") }}
             >
               {personalInfo.title}
@@ -65,30 +65,30 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
         </div>
 
         <div 
-          className="mt-4 flex flex-wrap gap-3 text-sm"
+          className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm cv-contact-info"
           style={{ color: getColorValue("textColor") }}
         >
           {personalInfo.email && (
             <div className="flex items-center gap-1">
-              <AtSign className="h-4 w-4" />
+              <AtSign className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{personalInfo.email}</span>
             </div>
           )}
           {personalInfo.phone && (
             <div className="flex items-center gap-1">
-              <Phone className="h-4 w-4" />
+              <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{personalInfo.phone}</span>
             </div>
           )}
           {personalInfo.location && (
             <div className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
+              <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{personalInfo.location}</span>
             </div>
           )}
           {personalInfo.website && (
             <div className="flex items-center gap-1">
-              <Globe className="h-4 w-4" />
+              <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{personalInfo.website}</span>
             </div>
           )}
@@ -96,7 +96,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
 
         {personalInfo.summary && (
           <p 
-            className="mt-4 text-sm"
+            className="mt-3 sm:mt-4 text-xs sm:text-sm"
             style={{ color: getColorValue("textColor") }}
           >
             {personalInfo.summary}
@@ -108,10 +108,10 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
       {sections.map((section, index) => (
         <div
           key={section.id}
-          className="mt-6 border-b border-gray-200 pb-6 last:border-0"
+          className="mt-4 sm:mt-6 border-b border-gray-200 pb-4 sm:pb-6 last:border-0"
         >
           <h2 
-            className="mb-4 text-xl font-semibold"
+            className="mb-3 sm:mb-4 text-lg sm:text-xl font-semibold cv-section-title"
             style={{ color: getColorValue("headingColor") }}
           >
             {section.title}
@@ -119,18 +119,18 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
 
           {/* Olika rendering beroende på sektionstyp */}
           {section.type === "education" && (
-            <div className="space-y-4">
-              {section.items.map((item: Education) => (
+            <div className="space-y-3 sm:space-y-4">
+              {(section.items as Education[]).map((item) => (
                 <div key={item.id}>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between cv-education-header">
                     <h3 
-                      className="font-medium"
+                      className="font-medium text-sm sm:text-base"
                       style={{ color: getColorValue("subHeadingColor") }}
                     >
                       {item.institution}
                     </h3>
                     <div 
-                      className="flex items-center gap-1 text-sm"
+                      className="flex items-center gap-1 text-xs sm:text-sm cv-daterange"
                       style={{ color: getColorValue("textColor") }}
                     >
                       <Calendar className="h-3 w-3" />
@@ -140,14 +140,14 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
                     </div>
                   </div>
                   <p 
-                    className="text-sm font-medium"
+                    className="text-xs sm:text-sm font-medium"
                     style={{ color: getColorValue("subHeadingColor") }}
                   >
                     {item.degree} i {item.field}
                   </p>
                   {item.description && (
                     <p 
-                      className="mt-1 text-sm"
+                      className="mt-1 text-xs sm:text-sm whitespace-pre-line"
                       style={{ color: getColorValue("textColor") }}
                     >
                       {item.description}
@@ -159,18 +159,18 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
           )}
 
           {section.type === "experience" && (
-            <div className="space-y-4">
-              {section.items.map((item: Experience) => (
+            <div className="space-y-3 sm:space-y-4">
+              {(section.items as Experience[]).map((item) => (
                 <div key={item.id}>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between cv-experience-header">
                     <h3 
-                      className="font-medium"
+                      className="font-medium text-sm sm:text-base"
                       style={{ color: getColorValue("subHeadingColor") }}
                     >
                       {item.company}
                     </h3>
                     <div 
-                      className="flex items-center gap-1 text-sm"
+                      className="flex items-center gap-1 text-xs sm:text-sm cv-daterange"
                       style={{ color: getColorValue("textColor") }}
                     >
                       <Calendar className="h-3 w-3" />
@@ -180,7 +180,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
                     </div>
                   </div>
                   <p 
-                    className="text-sm font-medium"
+                    className="text-xs sm:text-sm font-medium"
                     style={{ color: getColorValue("subHeadingColor") }}
                   >
                     {item.position}
@@ -188,7 +188,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
                   </p>
                   {item.description && (
                     <p 
-                      className="mt-1 text-sm"
+                      className="mt-1 text-xs sm:text-sm whitespace-pre-line"
                       style={{ color: getColorValue("textColor") }}
                     >
                       {item.description}
@@ -200,19 +200,19 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
           )}
 
           {section.type === "projects" && (
-            <div className="space-y-4">
-              {section.items.map((item: Project) => (
+            <div className="space-y-3 sm:space-y-4">
+              {(section.items as Project[]).map((item) => (
                 <div key={item.id}>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between cv-experience-header">
                     <h3 
-                      className="font-medium"
+                      className="font-medium text-sm sm:text-base"
                       style={{ color: getColorValue("subHeadingColor") }}
                     >
                       {item.name}
                     </h3>
                     {(item.startDate || item.endDate) && (
                       <div 
-                        className="flex items-center gap-1 text-sm"
+                        className="flex items-center gap-1 text-xs sm:text-sm cv-daterange"
                         style={{ color: getColorValue("textColor") }}
                       >
                         <Calendar className="h-3 w-3" />
@@ -237,7 +237,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
                   )}
                   {item.description && (
                     <p 
-                      className="mt-1 text-sm"
+                      className="mt-1 text-xs sm:text-sm whitespace-pre-line"
                       style={{ color: getColorValue("textColor") }}
                     >
                       {item.description}
@@ -249,8 +249,8 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
           )}
 
           {section.type === "skills" && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {section.items.map((item: Skill) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 cv-skills-grid">
+              {(section.items as Skill[]).map((item) => (
                 <div 
                   key={item.id}
                   className="flex items-center gap-2 rounded-md border border-gray-200 p-2"
@@ -268,7 +268,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
                     ))}
                   </div>
                   <span 
-                    className="ml-2 text-sm"
+                    className="ml-1 sm:ml-2 text-xs sm:text-sm"
                     style={{ color: getColorValue("textColor") }}
                   >
                     {item.name}
@@ -383,7 +383,7 @@ export function ModernLayout({ cv, profileImageStyle, profileImageClass, transpa
                 {skillsSection.title}
               </h2>
               <div className="space-y-2">
-                {skillsSection.items.map((skill: Skill) => (
+                {(skillsSection.items as Skill[]).map((skill) => (
                   <div key={skill.id}>
                     <div className="flex justify-between text-sm mb-1">
                       <span>{skill.name}</span>
@@ -434,7 +434,7 @@ export function ModernLayout({ cv, profileImageStyle, profileImageClass, transpa
               {experienceSection.title}
             </h2>
             <div className="space-y-4">
-              {experienceSection.items.map((item: Experience) => (
+              {(experienceSection.items as Experience[]).map((item) => (
                 <div key={item.id}>
                   <div className="flex justify-between items-center">
                     <h3 
@@ -461,7 +461,7 @@ export function ModernLayout({ cv, profileImageStyle, profileImageClass, transpa
                   </p>
                   {item.description && (
                     <p 
-                      className="mt-1 text-xs"
+                      className="mt-1 text-sm whitespace-pre-line"
                       style={{ color: getColorValue("textColor") }}
                     >
                       {item.description}
@@ -569,7 +569,7 @@ export function MinimalistLayout({ cv }: TemplateLayoutProps) {
             
             {section.type === "education" && (
               <div className="space-y-6">
-                {section.items.map((item: Education) => (
+                {(section.items as Education[]).map((item) => (
                   <div key={item.id} className="text-center">
                     <p 
                       className="text-sm font-medium uppercase"
@@ -598,7 +598,7 @@ export function MinimalistLayout({ cv }: TemplateLayoutProps) {
             
             {section.type === "experience" && (
               <div className="space-y-6">
-                {section.items.map((item: Experience) => (
+                {(section.items as Experience[]).map((item) => (
                   <div key={item.id} className="text-center">
                     <p 
                       className="text-sm font-medium uppercase"
@@ -627,7 +627,7 @@ export function MinimalistLayout({ cv }: TemplateLayoutProps) {
             
             {section.type === "projects" && (
               <div className="space-y-6">
-                {section.items.map((item: Project) => (
+                {(section.items as Project[]).map((item) => (
                   <div key={item.id} className="text-center">
                     <p 
                       className="text-sm font-medium uppercase"
@@ -668,7 +668,7 @@ export function MinimalistLayout({ cv }: TemplateLayoutProps) {
             
             {section.type === "skills" && (
               <div className="flex flex-wrap justify-center gap-2">
-                {section.items.map((item: Skill) => (
+                {(section.items as Skill[]).map((item) => (
                   <span 
                     key={item.id}
                     className="inline-block border px-3 py-1 text-xs"
@@ -868,7 +868,7 @@ export function CreativeLayout({ cv }: TemplateLayoutProps) {
                 </h2>
                 
                 <div className="space-y-6">
-                  {section.items.map((item: Experience, index) => (
+                  {(section.items as Experience[]).map((item, index) => (
                     <div key={item.id} className="relative pl-8">
                       {/* Tidslinjedekor */}
                       <div 
@@ -929,7 +929,7 @@ export function CreativeLayout({ cv }: TemplateLayoutProps) {
                 </h2>
                 
                 <div className="space-y-4">
-                  {section.items.map((item: Project) => (
+                  {(section.items as Project[]).map((item) => (
                     <div 
                       key={item.id} 
                       className="rounded-lg p-3"
@@ -961,7 +961,7 @@ export function CreativeLayout({ cv }: TemplateLayoutProps) {
                       )}
                       {item.description && (
                         <p 
-                          className="mt-2 text-xs"
+                          className="mt-2 text-xs whitespace-pre-line"
                           style={{ color: getColorValue("textColor") }}
                         >
                           {item.description}
@@ -989,7 +989,7 @@ export function CreativeLayout({ cv }: TemplateLayoutProps) {
                 </h2>
                 
                 <div className="space-y-4">
-                  {section.items.map((item: Education) => (
+                  {(section.items as Education[]).map((item) => (
                     <div 
                       key={item.id} 
                       className="rounded-lg border-l-4 p-3"
@@ -1012,7 +1012,7 @@ export function CreativeLayout({ cv }: TemplateLayoutProps) {
                       </p>
                       {item.description && (
                         <p 
-                          className="mt-2 text-xs"
+                          className="mt-2 text-xs whitespace-pre-line"
                           style={{ color: getColorValue("textColor") }}
                         >
                           {item.description}
@@ -1038,7 +1038,7 @@ export function CreativeLayout({ cv }: TemplateLayoutProps) {
                 </h2>
                 
                 <div className="grid grid-cols-2 gap-2">
-                  {section.items.map((item: Skill) => (
+                  {(section.items as Skill[]).map((item) => (
                     <div 
                       key={item.id}
                       className="flex items-center rounded-full px-3 py-2"
@@ -1201,7 +1201,7 @@ export function ProfessionalLayout({ cv }: TemplateLayoutProps) {
               </h2>
               
               <div className="space-y-3">
-                {section.items.map((item: Skill) => (
+                {(section.items as Skill[]).map((item) => (
                   <div key={item.id} className="space-y-1">
                     <div className="flex items-center justify-between">
                       <p 
@@ -1246,7 +1246,7 @@ export function ProfessionalLayout({ cv }: TemplateLayoutProps) {
               </h2>
               
               <div className="space-y-5">
-                {section.items.map((item: Experience) => (
+                {(section.items as Experience[]).map((item) => (
                   <div key={item.id} className="space-y-1">
                     <div className="flex flex-wrap items-center justify-between">
                       <h3 
@@ -1277,7 +1277,7 @@ export function ProfessionalLayout({ cv }: TemplateLayoutProps) {
                     
                     {item.description && (
                       <p 
-                        className="mt-2 text-sm"
+                        className="mt-2 text-sm whitespace-pre-line"
                         style={{ color: getColorValue("textColor") }}
                       >
                         {item.description}
@@ -1303,7 +1303,7 @@ export function ProfessionalLayout({ cv }: TemplateLayoutProps) {
               </h2>
               
               <div className="space-y-5">
-                {section.items.map((item: Education) => (
+                {(section.items as Education[]).map((item) => (
                   <div key={item.id} className="space-y-1">
                     <div className="flex flex-wrap items-center justify-between">
                       <h3 
@@ -1329,7 +1329,7 @@ export function ProfessionalLayout({ cv }: TemplateLayoutProps) {
                     
                     {item.description && (
                       <p 
-                        className="mt-2 text-sm"
+                        className="mt-2 text-sm whitespace-pre-line"
                         style={{ color: getColorValue("textColor") }}
                       >
                         {item.description}
@@ -1355,7 +1355,7 @@ export function ProfessionalLayout({ cv }: TemplateLayoutProps) {
               </h2>
               
               <div className="space-y-5">
-                {section.items.map((item: Project) => (
+                {(section.items as Project[]).map((item) => (
                   <div key={item.id} className="space-y-1">
                     <div className="flex flex-wrap items-center justify-between">
                       <h3 
@@ -1391,7 +1391,7 @@ export function ProfessionalLayout({ cv }: TemplateLayoutProps) {
                     
                     {item.description && (
                       <p 
-                        className="mt-2 text-sm"
+                        className="mt-2 text-sm whitespace-pre-line"
                         style={{ color: getColorValue("textColor") }}
                       >
                         {item.description}

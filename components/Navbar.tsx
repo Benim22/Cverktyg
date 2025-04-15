@@ -30,6 +30,7 @@ import { motion } from "framer-motion"
 import { AnimatedButton } from "@/components/animations/AnimatedButton"
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import { MobileSidebar } from "@/components/MobileSidebar"
 
 // Skapa en anpassad navigationslänkstil med förbättrad hover-effekt som fungerar bra i både light och dark mode
 const customNavLinkStyle = cn(
@@ -86,9 +87,11 @@ export function Navbar() {
       transition={{ duration: 0.3 }}
       className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     >
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
+      <div className="container flex h-16 items-center justify-between px-2 sm:px-4 md:px-6">
+        <div className="flex items-center gap-2 md:gap-6">
+          <MobileSidebar />
+          
+          <Link href="/" className="flex items-center gap-1 md:gap-2">
             <motion.div
               whileHover={{ 
                 rotate: 10, 
@@ -96,7 +99,7 @@ export function Navbar() {
                 boxShadow: theme === "dark" ? "0 0 12px 2px var(--primary)" : "none"
               }}
               transition={{ duration: 0.2 }}
-              className="relative h-10 w-10 overflow-hidden rounded-md bg-primary"
+              className="relative h-8 w-8 md:h-10 md:w-10 overflow-hidden rounded-md bg-primary"
             >
               <Check className="absolute inset-0 h-full w-full p-2 text-white" />
             </motion.div>
@@ -104,7 +107,7 @@ export function Navbar() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-2xl font-bold"
+              className="text-lg md:text-2xl font-bold"
             >
               CVerktyg
             </motion.span>

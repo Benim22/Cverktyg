@@ -25,16 +25,18 @@ export default function PreviewPage() {
         <div className="flex h-[calc(100vh-4rem)]">
           {isDesktop && <Sidebar />}
           <div className="flex-1 overflow-auto">
-            <div className="container py-6">
+            <div className="container py-4 sm:py-6">
               <FadeIn>
-                <div className="mb-6 flex items-center justify-between">
+                <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 sm:gap-0">
                   <AnimatedButton variant="outline" asChild>
                     <Link href={`/editor/${cvId}`}>
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Tillbaka till redigering
                     </Link>
                   </AnimatedButton>
-                  <PDFExporter />
+                  <div className="w-full sm:w-auto">
+                    <PDFExporter />
+                  </div>
                 </div>
               </FadeIn>
               <FadeIn delay={0.2}>

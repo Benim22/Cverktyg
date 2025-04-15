@@ -87,7 +87,7 @@ export function CVPreview({ cv }: CVPreviewProps) {
 
   return (
     <Card 
-      className="relative h-full max-h-[842px] w-full overflow-auto shadow-md cv-preview-container"
+      className="relative w-full overflow-auto shadow-md cv-preview-container mobile-cv-container"
       style={{ 
         backgroundColor: getColorValueFromCV("backgroundColor"),
         ...fontStyles 

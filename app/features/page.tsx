@@ -1,6 +1,7 @@
 "use client"
 
 import { Navbar } from "@/components/Navbar"
+import { MetaTags } from "@/components/MetaTags"
 import { 
   Edit, 
   Download, 
@@ -58,30 +59,36 @@ export default function FeaturesPage() {
   
   return (
     <>
+      <MetaTags 
+        title="Funktioner och verktyg för CV-skapande"
+        description="Upptäck CVerktygs kraftfulla funktioner för att skapa professionella CV:n. Intuitivt gränssnitt, anpassningsbara mallar och smidiga exportmöjligheter för att maximera dina chanser att få drömjobbet."
+        keywords="cv-funktioner, cv-verktyg, cv-skapare, professionellt cv, cv-mallar, cv-export, jobbansökan"
+        ogUrl="https://cverktyg.se/features"
+      />
       <Navbar />
       <PageTransition>
         {/* Hero-sektion */}
-        <div className="relative overflow-hidden bg-gradient-to-b from-primary/10 to-background py-20">
+        <div className="relative overflow-hidden bg-gradient-to-b from-primary/10 to-background py-12 sm:py-20">
           <div className="absolute -top-[10%] left-[30%] h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute bottom-[10%] left-[10%] h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute right-[20%] top-[30%] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
           
-          <div className="container relative z-10">
-            <div className="mx-auto mb-16 max-w-3xl text-center">
+          <div className="container relative z-10 px-4 sm:px-6">
+            <div className="mx-auto mb-10 sm:mb-16 max-w-3xl text-center">
               <motion.div 
                 initial={{ y: -20, opacity: 0 }} 
                 animate={{ y: 0, opacity: 1 }} 
                 transition={{ duration: 0.5 }}
-                className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 border border-primary/20 shadow-lg"
+                className="mx-auto mb-6 flex h-16 w-16 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-primary/10 border border-primary/20 shadow-lg"
               >
-                <Sparkles className="h-12 w-12 text-primary" />
+                <Sparkles className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
               </motion.div>
               
               <motion.h1 
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }} 
                 transition={{ delay: 0.2 }}
-                className="mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-4xl font-bold text-transparent sm:text-5xl"
+                className="mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-3xl sm:text-4xl md:text-5xl font-bold text-transparent"
               >
                 Funktioner i CVerktyg
               </motion.h1>
@@ -90,7 +97,7 @@ export default function FeaturesPage() {
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }} 
                 transition={{ delay: 0.3 }}
-                className="mx-auto max-w-2xl text-xl text-muted-foreground"
+                className="mx-auto max-w-2xl text-base sm:text-xl text-muted-foreground"
               >
                 Upptäck de kraftfulla verktygen som gör det enkelt att skapa ett professionellt 
                 och övertygande CV som särskiljer dig på arbetsmarknaden.
@@ -100,16 +107,16 @@ export default function FeaturesPage() {
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }} 
                 transition={{ delay: 0.4 }}
-                className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
+                className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
               >
                 <Link href="/dashboard">
-                  <Button size="lg" className="font-medium">
+                  <Button size="lg" className="font-medium w-full sm:w-auto">
                     Kom igång
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/templates/all">
-                  <Button size="lg" variant="outline" className="font-medium">
+                <Link href="/templates/all" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="font-medium w-full sm:w-auto">
                     Utforska mallar
                   </Button>
                 </Link>
@@ -121,18 +128,19 @@ export default function FeaturesPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5, duration: 0.5 }}
-              className="mx-auto max-w-4xl"
+              className="mx-auto max-w-3xl"
             >
-              <div className="relative rounded-xl border border-border bg-card/50 p-2 shadow-xl backdrop-blur">
+              <div className="relative rounded-xl border border-border bg-card/50 p-3 shadow-xl backdrop-blur">
                 <Image 
-                  src="/images/features/editor-overview.jpg" 
+                  src="/images/features/2792499.jpg" 
                   alt="CVerktyg redigerare" 
-                  width={1200} 
-                  height={675}
+                  width={600} 
+                  height={400}
                   className="w-full rounded-lg shadow-sm"
+                  priority
                 />
-                <div className="absolute -bottom-4 -right-4 rounded-full bg-primary p-4 shadow-lg">
-                  <Edit className="h-6 w-6 text-white" />
+                <div className="absolute -bottom-4 -right-4 rounded-full bg-primary p-3 sm:p-4 shadow-lg">
+                  <Edit className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
               </div>
             </motion.div>
@@ -140,11 +148,11 @@ export default function FeaturesPage() {
         </div>
         
         {/* Huvudinnehåll */}
-        <div className="container py-20">
-          <div className="mb-16 text-center">
+        <div className="container py-12 sm:py-20 px-4 sm:px-6">
+          <div className="mb-10 sm:mb-16 text-center">
             <FadeIn>
-              <h2 className="mb-4 text-3xl font-bold sm:text-4xl">Allt du behöver för att skapa ett professionellt CV</h2>
-              <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+              <h2 className="mb-4 text-2xl sm:text-3xl md:text-4xl font-bold">Allt du behöver för att skapa ett professionellt CV</h2>
+              <p className="mx-auto max-w-2xl text-base sm:text-lg text-muted-foreground">
                 Våra kraftfulla och användarvänliga verktyg hjälper dig att skapa ett CV som 
                 hjälper dig att få ditt drömjobb.
               </p>
@@ -153,25 +161,28 @@ export default function FeaturesPage() {
           
           {/* Flikar för funktionskategorier */}
           <Tabs defaultValue="editor" className="mx-auto max-w-5xl">
-            <div className="mb-12 flex justify-center">
-              <TabsList className="grid w-full max-w-2xl grid-cols-1 sm:grid-cols-3">
-                <TabsTrigger value="editor" className="text-sm sm:text-base">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Redigerare
+            <div className="mb-8 sm:mb-12 flex justify-center">
+              <TabsList className="grid w-full max-w-2xl grid-cols-3">
+                <TabsTrigger value="editor" className="px-2 sm:px-4 text-xs sm:text-sm md:text-base">
+                  <Edit className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Redigerare</span>
+                  <span className="xs:hidden">Red.</span>
                 </TabsTrigger>
-                <TabsTrigger value="templates" className="text-sm sm:text-base">
-                  <Layout className="mr-2 h-4 w-4" />
-                  Mallar
+                <TabsTrigger value="templates" className="px-2 sm:px-4 text-xs sm:text-sm md:text-base">
+                  <Layout className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Mallar</span>
+                  <span className="xs:hidden">Mall.</span>
                 </TabsTrigger>
-                <TabsTrigger value="export" className="text-sm sm:text-base">
-                  <Download className="mr-2 h-4 w-4" />
-                  Export
+                <TabsTrigger value="export" className="px-2 sm:px-4 text-xs sm:text-sm md:text-base">
+                  <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Export</span>
+                  <span className="xs:hidden">Exp.</span>
                 </TabsTrigger>
               </TabsList>
             </div>
             
             {/* Redigerare-flik */}
-            <TabsContent value="editor" className="space-y-12">
+            <TabsContent value="editor" className="space-y-8 sm:space-y-12">
               <div className="grid gap-12 md:grid-cols-2 md:items-center">
                 <div className="order-2 md:order-1">
                   <motion.div 
@@ -203,10 +214,10 @@ export default function FeaturesPage() {
                           variants={fadeUpAnimation}
                           className="flex items-start"
                         >
-                          <div className="mr-3 mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10">
-                            <Check className="h-3 w-3 text-primary" />
+                          <div className="mr-2 sm:mr-3 mt-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-primary/10">
+                            <Check className="h-2 w-2 sm:h-3 sm:w-3 text-primary" />
                           </div>
-                          <span>{feature}</span>
+                          <span className="text-sm sm:text-base">{feature}</span>
                         </motion.li>
                       ))}
                     </ul>
@@ -215,20 +226,20 @@ export default function FeaturesPage() {
                 
                 <div className="order-1 md:order-2">
                   <motion.div 
-                    initial={{ opacity: 0, x: 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                     className="relative rounded-xl border border-border bg-card/30 p-3 shadow-lg"
                   >
                     <Image 
-                      src="/images/features/editor-ui.jpg" 
+                      src="/images/features/f1.png" 
                       alt="Intuitivt gränssnitt" 
                       width={600} 
                       height={400}
-                      className="w-full rounded-lg shadow-sm"
+                      className="w-full rounded-lg shadow-sm object-contain"
                     />
-                    <div className="absolute -bottom-3 -left-3 rounded-full bg-primary/10 p-3 shadow-lg border border-primary/20">
+                    <div className="absolute -bottom-3 -right-3 rounded-full bg-primary/10 p-3 shadow-lg border border-primary/20">
                       <PenTool className="h-5 w-5 text-primary" />
                     </div>
                   </motion.div>
@@ -245,11 +256,11 @@ export default function FeaturesPage() {
                     className="relative rounded-xl border border-border bg-card/30 p-3 shadow-lg"
                   >
                     <Image 
-                      src="/images/features/color-themes.jpg" 
+                      src="/images/features/4.png" 
                       alt="Anpassningsbara färgscheman" 
                       width={600} 
                       height={400}
-                      className="w-full rounded-lg shadow-sm"
+                      className="w-full rounded-lg shadow-sm object-contain"
                     />
                     <div className="absolute -bottom-3 -right-3 rounded-full bg-primary/10 p-3 shadow-lg border border-primary/20">
                       <Palette className="h-5 w-5 text-primary" />
@@ -287,10 +298,10 @@ export default function FeaturesPage() {
                           variants={fadeUpAnimation}
                           className="flex items-start"
                         >
-                          <div className="mr-3 mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10">
-                            <Check className="h-3 w-3 text-primary" />
+                          <div className="mr-2 sm:mr-3 mt-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-primary/10">
+                            <Check className="h-2 w-2 sm:h-3 sm:w-3 text-primary" />
                           </div>
-                          <span>{feature}</span>
+                          <span className="text-sm sm:text-base">{feature}</span>
                         </motion.li>
                       ))}
                     </ul>
@@ -300,7 +311,7 @@ export default function FeaturesPage() {
             </TabsContent>
             
             {/* Mallar-flik */}
-            <TabsContent value="templates" className="space-y-12">
+            <TabsContent value="templates" className="space-y-8 sm:space-y-12">
               <div className="grid gap-12 md:grid-cols-2 md:items-center">
                 <div>
                   <motion.div 
@@ -332,10 +343,10 @@ export default function FeaturesPage() {
                           variants={fadeUpAnimation}
                           className="flex items-start"
                         >
-                          <div className="mr-3 mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10">
-                            <Check className="h-3 w-3 text-primary" />
+                          <div className="mr-2 sm:mr-3 mt-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-primary/10">
+                            <Check className="h-2 w-2 sm:h-3 sm:w-3 text-primary" />
                           </div>
-                          <span>{feature}</span>
+                          <span className="text-sm sm:text-base">{feature}</span>
                         </motion.li>
                       ))}
                     </ul>
@@ -356,60 +367,105 @@ export default function FeaturesPage() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="grid grid-cols-2 gap-4"
+                    className="relative rounded-xl border border-border bg-card/30 p-3 shadow-lg"
                   >
-                    {[
-                      { title: "Modern", image: "/images/features/template-modern.jpg" },
-                      { title: "Professionell", image: "/images/features/template-professional.jpg" },
-                      { title: "Kreativ", image: "/images/features/template-creative.jpg" },
-                      { title: "Traditionell", image: "/images/features/template-traditional.jpg" }
-                    ].map((template, index) => (
-                      <motion.div 
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: index * 0.1, duration: 0.5 }}
-                        className="group relative overflow-hidden rounded-lg border border-border"
-                      >
-                        <div className="aspect-[3/4] w-full">
-                          <Image 
-                            src={template.image} 
-                            alt={template.title} 
-                            width={300} 
-                            height={400}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        <div className="absolute bottom-0 w-full bg-black/50 p-2 text-center text-white backdrop-blur-sm">
-                          {template.title}
-                        </div>
-                      </motion.div>
-                    ))}
+                    <Image 
+                      src="/images/features/f2.png" 
+                      alt="Professionella mallar" 
+                      width={600} 
+                      height={400}
+                      className="w-full rounded-lg shadow-sm"
+                    />
+                    <div className="absolute -bottom-3 -right-3 rounded-full bg-primary/10 p-3 shadow-lg border border-primary/20">
+                      <Layout className="h-5 w-5 text-primary" />
+                    </div>
                   </motion.div>
                 </div>
               </div>
               
-              <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
+              <div className="grid gap-12 md:grid-cols-2 md:items-center mt-12">
+                <div className="order-1 md:order-1">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="relative rounded-xl border border-border bg-card/30 p-3 shadow-lg"
+                  >
+                    <Image 
+                      src="/images/features/f3.png" 
+                      alt="Flexibla exportalternativ för mallar" 
+                      width={600} 
+                      height={400}
+                      className="w-full rounded-lg shadow-sm object-contain"
+                    />
+                    <div className="absolute -bottom-3 -right-3 rounded-full bg-primary/10 p-3 shadow-lg border border-primary/20">
+                      <Download className="h-5 w-5 text-primary" />
+                    </div>
+                  </motion.div>
+                </div>
+                
+                <div className="order-2 md:order-2">
+                  <motion.div 
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    custom={0}
+                    variants={fadeUpAnimation}
+                  >
+                    <h3 className="mb-4 text-2xl font-bold">Flexibla exportalternativ</h3>
+                    <p className="mb-6 text-muted-foreground">
+                      Exportera din valda mall i olika format, perfekt för olika ansökningskanaler. 
+                      Varje export är optimerad för högsta kvalitet och professionellt utseende.
+                    </p>
+                    <ul className="space-y-3">
+                      {[
+                        "Högkvalitativ PDF med bibehållen formatering",
+                        "ATS-vänliga format för jobbportaler",
+                        "Delningslänkar för din online-profil",
+                        "Print-optimerade utskrifter",
+                        "Exportera specifika versioner för olika tjänster"
+                      ].map((feature, index) => (
+                        <motion.li 
+                          key={index}
+                          initial="hidden"
+                          whileInView="visible"
+                          viewport={{ once: true }}
+                          custom={index + 1}
+                          variants={fadeUpAnimation}
+                          className="flex items-start"
+                        >
+                          <div className="mr-2 sm:mr-3 mt-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-primary/10">
+                            <Check className="h-2 w-2 sm:h-3 sm:w-3 text-primary" />
+                          </div>
+                          <span className="text-sm sm:text-base">{feature}</span>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                </div>
+              </div>
+              
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-6">
                 <div className="flex flex-col items-center sm:flex-row sm:items-start">
                   <div className="mb-4 sm:mb-0 sm:mr-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                      <LightbulbIcon className="h-6 w-6 text-primary" />
+                    <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-primary/10">
+                      <LightbulbIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                   </div>
                   <div>
-                    <h4 className="mb-2 text-lg font-semibold">Tips för att välja rätt mall</h4>
-                    <p className="mb-4 text-muted-foreground">
+                    <h4 className="mb-2 text-base sm:text-lg font-semibold">Tips för att välja rätt mall</h4>
+                    <p className="mb-4 text-sm sm:text-base text-muted-foreground">
                       När du väljer en CV-mall, tänk på branschens förväntningar och din personliga stil.
                       Kreativa branscher tillåter mer unika designer, medan traditionella branscher kan föredra 
                       mer konservativa format. Se till att mallen framhäver dina viktigaste egenskaper!
                     </p>
                     <Link 
                       href="/resources/tips" 
-                      className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+                      className="inline-flex items-center text-xs sm:text-sm font-medium text-primary hover:underline"
                     >
                       Läs fler tips
-                      <ArrowRight className="ml-1 h-4 w-4" />
+                      <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
                     </Link>
                   </div>
                 </div>
@@ -417,7 +473,7 @@ export default function FeaturesPage() {
             </TabsContent>
             
             {/* Export-flik */}
-            <TabsContent value="export" className="space-y-12">
+            <TabsContent value="export" className="space-y-8 sm:space-y-12">
               <div className="grid gap-12 md:grid-cols-2 md:items-center">
                 <div className="order-2 md:order-1">
                   <motion.div 
@@ -449,10 +505,10 @@ export default function FeaturesPage() {
                           variants={fadeUpAnimation}
                           className="flex items-start"
                         >
-                          <div className="mr-3 mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10">
-                            <Check className="h-3 w-3 text-primary" />
+                          <div className="mr-2 sm:mr-3 mt-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-primary/10">
+                            <Check className="h-2 w-2 sm:h-3 sm:w-3 text-primary" />
                           </div>
-                          <span>{feature}</span>
+                          <span className="text-sm sm:text-base">{feature}</span>
                         </motion.li>
                       ))}
                     </ul>
@@ -461,18 +517,18 @@ export default function FeaturesPage() {
                 
                 <div className="order-1 md:order-2">
                   <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                     className="relative rounded-xl border border-border bg-card/30 p-3 shadow-lg"
                   >
                     <Image 
-                      src="/images/features/export-options.jpg" 
-                      alt="Exportalternativ" 
+                      src="/images/features/f3.png" 
+                      alt="Flexibla exportalternativ" 
                       width={600} 
                       height={400}
-                      className="w-full rounded-lg shadow-sm"
+                      className="w-full rounded-lg shadow-sm object-contain"
                     />
                     <div className="absolute -bottom-3 -right-3 rounded-full bg-primary/10 p-3 shadow-lg border border-primary/20">
                       <FileText className="h-5 w-5 text-primary" />
@@ -505,13 +561,13 @@ export default function FeaturesPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1, duration: 0.5 }}
-                    className="flex flex-col items-center rounded-xl border border-border bg-background p-6 text-center shadow-sm transition-all hover:shadow-md"
+                    className="flex flex-col items-center rounded-xl border border-border bg-background p-4 sm:p-6 text-center shadow-sm transition-all hover:shadow-md"
                   >
-                    <div className="mb-4 rounded-full bg-primary/10 p-4">
+                    <div className="mb-3 sm:mb-4 rounded-full bg-primary/10 p-3 sm:p-4">
                       {feature.icon}
                     </div>
-                    <h4 className="mb-2 text-xl font-bold">{feature.title}</h4>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <h4 className="mb-1 sm:mb-2 text-lg sm:text-xl font-bold">{feature.title}</h4>
+                    <p className="text-sm sm:text-base text-muted-foreground">{feature.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -519,18 +575,18 @@ export default function FeaturesPage() {
           </Tabs>
           
           {/* Fördelar */}
-          <div className="mt-32">
-            <div className="mb-16 text-center">
+          <div className="mt-16 sm:mt-32">
+            <div className="mb-10 sm:mb-16 text-center">
               <FadeIn>
-                <h2 className="mb-4 text-3xl font-bold sm:text-4xl">Varför välja CVerktyg?</h2>
-                <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+                <h2 className="mb-4 text-2xl sm:text-3xl md:text-4xl font-bold">Varför välja CVerktyg?</h2>
+                <p className="mx-auto max-w-2xl text-base sm:text-lg text-muted-foreground">
                   Vår tjänst skiljer sig från andra CV-byggare genom vår fokus på 
                   kvalitet, användarvänlighet och professionella resultat.
                 </p>
               </FadeIn>
             </div>
             
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 {
                   title: "Användarvänligt",
@@ -558,12 +614,12 @@ export default function FeaturesPage() {
                 }
               ].map((benefit, index) => (
                 <FadeIn key={index} delay={index * 0.1}>
-                  <div className="rounded-xl border border-border p-6 shadow-sm transition-all hover:shadow-md">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                      <Check className="h-6 w-6 text-primary" />
+                  <div className="rounded-xl border border-border p-4 sm:p-6 shadow-sm transition-all hover:shadow-md">
+                    <div className="mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-primary/10">
+                      <Check className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
-                    <h3 className="mb-2 text-xl font-bold">{benefit.title}</h3>
-                    <p className="text-muted-foreground">{benefit.description}</p>
+                    <h3 className="mb-1 sm:mb-2 text-lg sm:text-xl font-bold">{benefit.title}</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">{benefit.description}</p>
                   </div>
                 </FadeIn>
               ))}
@@ -571,16 +627,16 @@ export default function FeaturesPage() {
           </div>
           
           {/* CTA-sektion */}
-          <div className="mt-24">
+          <div className="mt-16 sm:mt-24">
             <motion.div 
               initial={{ y: 50, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-primary/80 to-primary p-8 text-center shadow-lg sm:p-12"
+              className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-primary/80 to-primary p-6 sm:p-8 md:p-12 text-center shadow-lg"
             >
-              <h2 className="mb-6 text-2xl font-bold text-white md:text-3xl">Redo att skapa ditt professionella CV?</h2>
-              <p className="mx-auto mb-8 max-w-2xl text-white/90">
+              <h2 className="mb-4 sm:mb-6 text-xl sm:text-2xl md:text-3xl font-bold text-white">Redo att skapa ditt professionella CV?</h2>
+              <p className="mx-auto mb-6 sm:mb-8 max-w-2xl text-sm sm:text-base text-white/90">
                 Kom igång redan idag och ta det första steget mot din drömkarriär. 
                 Skapa ditt första CV kostnadsfritt och se skillnaden själv.
               </p>
@@ -589,15 +645,15 @@ export default function FeaturesPage() {
                   asChild
                   size="lg" 
                   variant="secondary"
-                  className="font-semibold"
+                  className="font-semibold w-full sm:w-auto"
                 >
                   <Link href="/dashboard">Skapa mitt CV nu</Link>
                 </AnimatedButton>
-                <Link href="/templates/all">
+                <Link href="/templates/all" className="w-full sm:w-auto">
                   <Button 
                     size="lg" 
                     variant="outline" 
-                    className="bg-transparent border-white/30 text-white hover:bg-white/10 font-medium"
+                    className="bg-transparent border-white/30 text-white hover:bg-white/10 font-medium w-full sm:w-auto"
                   >
                     Utforska mallar
                   </Button>
@@ -612,12 +668,12 @@ export default function FeaturesPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: scrolled ? 1 : 0 }}
           className={cn(
-            "fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all hover:bg-primary/90",
+            "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all hover:bg-primary/90",
             scrolled ? "visible translate-y-0" : "invisible translate-y-10"
           )}
           onClick={scrollToTop}
         >
-          <ArrowUp className="h-6 w-6" />
+          <ArrowUp className="h-5 w-5 sm:h-6 sm:w-6" />
         </motion.button>
       </PageTransition>
     </>

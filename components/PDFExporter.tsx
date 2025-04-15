@@ -204,16 +204,21 @@ export function PDFExporter() {
   return (
     <>
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Button onClick={handleExportClick} disabled={isExporting || !currentCV} className="w-full">
+        <Button 
+          onClick={handleExportClick} 
+          disabled={isExporting || !currentCV} 
+          className="w-full h-10 sm:h-auto"
+          size="sm"
+        >
           {isExporting ? (
             <>
               <LoadingSpinner className="mr-2 h-4 w-4" />
-              Exporterar...
+              {window.innerWidth > 400 ? "Exporterar..." : ""}
             </>
           ) : (
             <>
               <Download className="mr-2 h-4 w-4" />
-              Exportera som PDF
+              Exportera PDF
             </>
           )}
         </Button>

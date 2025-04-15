@@ -1,6 +1,7 @@
 "use client"
 
 import { Navbar } from "@/components/Navbar"
+import { MetaTags } from "@/components/MetaTags"
 import { Check, Users, HeartHandshake, Sparkles, LightbulbIcon, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -34,6 +35,12 @@ const slideIn = {
 export default function AboutPage() {
   return (
     <>
+      <MetaTags 
+        title="Om CVerktyg - Vår vision och historia"
+        description="Lär känna teamet bakom CVerktyg. Vi hjälper människor att skapa professionella CV:n som öppnar dörrar till nya karriärmöjligheter genom innovativa och användarvänliga verktyg."
+        keywords="om cverktyg, cv-företag, cv-tjänst, cv-skapande team, professionella cv-verktyg, karriärhjälp"
+        ogUrl="https://cverktyg.se/about"
+      />
       <Navbar />
       <PageTransition>
         {/* Hero-sektion */}

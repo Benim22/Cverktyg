@@ -4,7 +4,7 @@ import { useCV } from "@/contexts/CVContext"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PersonalInfoForm } from "@/components/PersonalInfoForm"
 import { SectionsList } from "@/components/SectionsList"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, Save, Loader2, Palette, User, Layers, Settings } from "lucide-react"
 import {
   Dialog,
@@ -25,9 +25,13 @@ import { AnimatedButton } from "@/components/animations/AnimatedButton"
 import { FadeIn } from "@/components/animations/FadeIn"
 import { TemplateGallery } from "@/components/templates/TemplateGallery"
 import Link from "next/link"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { CVEditorMobile } from "@/components/CVEditorMobile"
+import { formatDistanceToNow } from "date-fns"
+import { sv } from "date-fns/locale"
 
 export function CVEditor() {
-  const { currentCV, addSection, saveCV, loading } = useCV()
+  const { currentCV, addSection, saveCV, loading, lastSaveTime, isAutoSaving } = useCV()
   const [activeTab, setActiveTab] = useState("personal")
   const [newSectionType, setNewSectionType] = useState<string>("education")
   const [newSectionTitle, setNewSectionTitle] = useState<string>("")
@@ -35,6 +39,7 @@ export function CVEditor() {
   const [isSaving, setIsSaving] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const isMobile = useIsMobile()
 
   const handleAddSection = () => {
     if (!newSectionTitle) {
@@ -77,6 +82,16 @@ export function CVEditor() {
     router.push(`/preview/${currentCV?.id}`)
   }
 
+  // Formatera senaste sparningstiden för visning
+  const formatLastSaveTime = () => {
+    if (!lastSaveTime) return "Aldrig sparat"
+    
+    return `Sparades ${formatDistanceToNow(lastSaveTime, { 
+      addSuffix: true, 
+      locale: sv 
+    })}`
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col gap-4">
@@ -89,6 +104,11 @@ export function CVEditor() {
       </div>
     )
   }
+  
+  // Visa mobilversionen på mindre skärmar
+  if (isMobile) {
+    return <CVEditorMobile />
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -98,12 +118,23 @@ export function CVEditor() {
         transition={{ duration: 0.3 }}
         className="flex items-center justify-between"
       >
-        <h1 className="text-2xl font-bold">{currentCV?.title || "Nytt CV"}</h1>
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold">{currentCV?.title || "Nytt CV"}</h1>
+          <span className="text-xs text-muted-foreground">
+            {isAutoSaving ? 
+              <span className="flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Sparar automatiskt...
+              </span> : 
+              formatLastSaveTime()
+            }
+          </span>
+        </div>
         <div className="flex gap-2">
           <AnimatedButton 
             variant="outline" 
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isAutoSaving}
           >
             {isSaving ? (
               <>

@@ -285,6 +285,10 @@ export function PersonalInfoForm() {
                           {...field}
                         />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Tips: Inkludera din bakgrund, expertisområden, och vad du kan bidra med. Håll det koncist och relevant.
+                        Exempel: "Erfaren webbutvecklare med 5 års erfarenhet av att skapa användarvänliga applikationer med React och Node.js. Specialiserad på e-handelslösningar med fokus på prestanda och användarvänlighet."
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -27,7 +27,7 @@ export default function EditorPage() {
         <div className="flex h-[calc(100vh-4rem)]">
           {isDesktop && <Sidebar />}
           <div className="flex-1 overflow-auto">
-            <div className="container py-6">
+            <div className="container py-4 sm:py-6 px-4 sm:px-6">
               {isDesktop ? (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <FadeIn>
@@ -49,32 +49,22 @@ export default function EditorPage() {
                   </FadeIn>
                 </div>
               ) : (
-                <>
-                  {!isDesktop && (
-                    <FadeIn>
-                      <div className="mb-4 flex justify-between">
-                        <h1 className="text-2xl font-bold">
-                          {activeTab === "editor" ? "Redigera CV" : "Förhandsgranskning"}
-                        </h1>
-                      </div>
-                    </FadeIn>
-                  )}
-                  <FadeIn delay={0.1}>
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="editor">Redigera</TabsTrigger>
-                        <TabsTrigger value="preview">Förhandsgranskning</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="editor" className="mt-4">
-                        <CVEditor />
-                      </TabsContent>
-                      <TabsContent value="preview" className="mt-4 space-y-4">
-                        <CVPreview />
-                        <PDFExporter />
-                      </TabsContent>
-                    </Tabs>
-                  </FadeIn>
-                </>
+                <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="editor">Redigera</TabsTrigger>
+                    <TabsTrigger value="preview">Förhandsvisning</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="editor" className="mt-4 pb-20">
+                    <CVEditor />
+                  </TabsContent>
+                  <TabsContent value="preview" className="mt-4 pb-20">
+                    <h2 className="text-lg font-semibold mb-3">Förhandsgranskning</h2>
+                    <CVPreview />
+                    <div className="mt-4">
+                      <PDFExporter />
+                    </div>
+                  </TabsContent>
+                </Tabs>
               )}
             </div>
           </div>

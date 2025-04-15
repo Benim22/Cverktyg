@@ -252,6 +252,10 @@ export function ExperienceForm({ sectionId, items = [], isAdding = false }: Expe
                     {...field}
                   />
                 </FormControl>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Tips: Inkludera konkreta resultat, tekniker/verktyg du använde, och utmaningar du löste. 
+                  Exempel: "Utvecklade en e-handelslösning med React och Node.js som ökade konverteringsgraden med 15%."
+                </p>
                 <FormMessage />
               </FormItem>
             )}

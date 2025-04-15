@@ -8,6 +8,7 @@ import { getCV, updateCV as updateCVInDB, getSupabaseClient } from "@/lib/supaba
 import { useParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { CV_TEMPLATES } from "@/data/templates"
+import { createAutoSave } from "@/lib/auto-save"
 
 interface CVContextType {
   currentCV: CV | null
@@ -27,6 +28,8 @@ interface CVContextType {
   availableTemplates: CVTemplate[]
   setTemplate: (templateId: string) => void
   getTemplateById: (templateId: string) => CVTemplate | undefined
+  lastSaveTime: Date | null
+  isAutoSaving: boolean
 }
 
 const CVContext = createContext<CVContextType | undefined>(undefined)
@@ -58,6 +61,8 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
       templateId: "standard", // Standard mall som default
     },
   )
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
+  const [isAutoSaving, setIsAutoSaving] = useState(false)
 
   // Hämta användarinformation
   useEffect(() => {
@@ -76,39 +81,59 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
     checkAuth()
   }, [cvId, router])
 
-  // Hämta CV-data om det är ett befintligt CV
+  // Hämta CV-data om det är ett befintligt CV och inget initialCV redan skickats med
   useEffect(() => {
+    // Hoppa över hämtning från databasen om initialCV redan har skickats med
+    if (initialCV) {
+      setLoading(false);
+      return;
+    }
+
     if (cvId && userId) {
       const fetchCV = async () => {
         try {
           setLoading(true)
+          
+          console.log("Hämtar CV med ID:", cvId, "för användare:", userId);
           const { data, error } = await getCV(cvId, userId)
           
           if (error) {
-            console.error("Fel vid hämtning av CV:", error)
-            toast.error("Kunde inte ladda CV-data")
+            console.error("Fel vid hämtning av CV:", error || "Okänt fel", "Detaljer:", JSON.stringify(error));
+            toast.error("Kunde inte ladda CV-data. Försök igen senare.");
+            // Navigera till dashboard om det är ett problem med att hämta CV
+            router.push("/dashboard")
             return
           }
           
-          if (data) {
-            // Konvertera databasens format till appens interna format
-            const cvData = data.content || {}
-            setCurrentCV({
-              id: data.id,
-              title: data.title,
-              personalInfo: cvData.personalInfo || {},
-              sections: cvData.sections || [],
-              colorScheme: cvData.colorScheme || { ...DEFAULT_COLOR_SCHEME },
-              createdAt: data.created_at,
-              updatedAt: data.updated_at,
-              templateId: cvData.templateId || "standard",
-            })
-            
-            toast.success(`CV "${data.title}" har laddats`)
+          if (!data) {
+            console.error("Ingen data hittades för detta CV-ID")
+            toast.error("Hittar inte det efterfrågade CV:t")
+            router.push("/dashboard")
+            return
           }
-        } catch (error) {
-          console.error("Fel vid hämtning av CV:", error)
-          toast.error("Ett fel uppstod när CV:t skulle laddas")
+          
+          // Konvertera databasens format till appens interna format
+          const cvData = data.content || {}
+          setCurrentCV({
+            id: data.id,
+            title: data.title || "Namnlöst CV",
+            personalInfo: cvData.personalInfo || {},
+            sections: cvData.sections || [],
+            colorScheme: cvData.colorScheme || { ...DEFAULT_COLOR_SCHEME },
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+            templateId: cvData.templateId || "standard",
+          })
+          
+          toast.success(`CV "${data.title || 'Namnlöst CV'}" har laddats`)
+        } catch (error: any) {
+          console.error("Fel vid hämtning av CV:", 
+            error?.message || error || "Okänt fel", 
+            "Stack:", error?.stack,
+            "Detaljer:", typeof error === 'object' ? JSON.stringify(error) : error
+          );
+          toast.error("Ett fel uppstod när CV:t skulle laddas. Försök igen senare.")
+          router.push("/dashboard")
         } finally {
           setLoading(false)
         }
@@ -116,7 +141,7 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
       
       fetchCV()
     }
-  }, [cvId, userId])
+  }, [cvId, userId, router, initialCV])
 
   const setPersonalInfo = (info: PersonalInfo) => {
     setCurrentCV((prev) => ({
@@ -342,39 +367,78 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
     return (currentCV?.colorScheme && currentCV.colorScheme[key]) || DEFAULT_COLOR_SCHEME[key];
   }
 
-  const saveCV = async (): Promise<string> => {
-    if (!userId) {
-      toast.error("Du måste vara inloggad för att spara CV")
-      throw new Error("Inte inloggad")
-    }
+  // Skapa autosparfunktion
+  const saveCVToDatabase = async () => {
+    // Kontrollera om det är ett initialCV (preview) - i så fall avbryt
+    if (initialCV || !currentCV || !userId) return ""
     
+    setIsAutoSaving(true)
     try {
-      // Uppdatera timestamp
-      const updatedCV = {
-        ...currentCV,
-        updatedAt: new Date().toISOString(),
-      }
-      
-      setCurrentCV(updatedCV)
-      
-      // Spara till databasen
-      const { error } = await updateCVInDB(currentCV.id, userId, {
+      // Skapa rätt format för att spara till databasen
+      const cvUpdates = {
         title: currentCV.title,
-        content: updatedCV,
-      })
+        content: currentCV,
+        updated_at: new Date().toISOString()
+      }
+
+      // Anropa med korrekt parametrar: cvId, userId, dataobjekt
+      const { data, error } = await updateCVInDB(currentCV.id, userId, cvUpdates)
       
       if (error) {
         console.error("Fel vid sparande av CV:", error)
-        toast.error(`Kunde inte spara CV: ${error.message || "Okänt fel"}`)
-        throw new Error("Kunde inte spara CV")
+        return ""
       }
       
-      toast.success("Ditt CV har sparats framgångsrikt!")
+      setLastSaveTime(new Date())
       return currentCV.id
     } catch (error) {
       console.error("Fel vid sparande:", error)
-      toast.error(`Ett fel uppstod vid sparandet: ${error.message || "Okänt fel"}`)
-      throw error
+      return ""
+    } finally {
+      setIsAutoSaving(false)
+    }
+  }
+  
+  // Skapa autosparfunktionen med debounce
+  const { autoSave } = createAutoSave(saveCVToDatabase, 2000)
+  
+  // Lyssna på ändringar i CV-data och spara automatiskt
+  useEffect(() => {
+    if (currentCV && userId && !loading && !initialCV) {
+      autoSave()
+    }
+  }, [currentCV, userId, loading, initialCV])
+
+  // Uppdatera saveCV-funktionen för att också sätta lastSaveTime
+  const saveCV = async (): Promise<string> => {
+    // Om det är ett initialCV (preview) ska vi inte försöka spara till databasen
+    if (initialCV) {
+      return currentCV?.id || ""
+    }
+    
+    if (!userId) {
+      toast.error("Du måste vara inloggad för att spara CV")
+      return ""
+    }
+
+    // Använd samma funktion som autospar använder
+    setIsAutoSaving(true)
+    try {
+      const cvId = await saveCVToDatabase()
+      
+      if (cvId) {
+        toast.success("CV sparat")
+      } else {
+        toast.error("Kunde inte spara CV")
+      }
+      
+      return cvId
+    } catch (error) {
+      console.error("Fel vid spara:", error)
+      toast.error("Ett fel uppstod vid sparande")
+      return ""
+    } finally {
+      setIsAutoSaving(false)
     }
   }
 
@@ -397,7 +461,9 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
         loading,
         availableTemplates: CV_TEMPLATES,
         setTemplate,
-        getTemplateById
+        getTemplateById,
+        lastSaveTime,
+        isAutoSaving
       }}
     >
       {children}
@@ -412,4 +478,5 @@ export function useCV() {
   }
   return context
 }
+
 

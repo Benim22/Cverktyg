@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        'xs': '480px',
+      },
       colors: {
         primary: {
           DEFAULT: "#265DAB",

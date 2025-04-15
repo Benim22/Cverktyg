@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getSupabaseClient, type CV, updateCV } from "@/lib/supabase-client"
-import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageTransition } from "@/components/animations/PageTransition"
@@ -11,6 +10,7 @@ import { Loader2, Plus, FileText, Trash2, Edit, Copy, Eye, PenLine, Share2 } fro
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useSubscription } from "@/contexts/SubscriptionContext"
 import { 
   Dialog, 
   DialogContent, 
@@ -22,6 +22,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CVThumbnail } from "@/components/CVThumbnail"
+import { PaywallModal } from "@/components/PaywallModal"
+import { AppLayout } from "@/components/layout/AppLayout"
+
+const MAX_FREE_CVS = 3
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -31,6 +35,8 @@ export default function DashboardPage() {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [selectedCV, setSelectedCV] = useState<CV | null>(null)
   const [newCVName, setNewCVName] = useState("")
+  const { isFreePlan } = useSubscription()
+  const [showPaywall, setShowPaywall] = useState(false)
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -97,6 +103,11 @@ export default function DashboardPage() {
   }
   
   const handleCreateCV = () => {
+    if (isFreePlan() && cvs.length >= MAX_FREE_CVS) {
+      setShowPaywall(true)
+      return
+    }
+    
     router.push("/editor/new")
   }
 
@@ -163,19 +174,17 @@ export default function DashboardPage() {
   
   if (loading) {
     return (
-      <>
-        <Navbar />
+      <AppLayout>
         <div className="flex items-center justify-center min-h-[80vh]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-2">Laddar dashboard...</span>
         </div>
-      </>
+      </AppLayout>
     )
   }
   
   return (
-    <>
-      <Navbar />
+    <AppLayout>
       <PageTransition>
         <div className="container py-10">
           <div className="flex justify-between items-center mb-8">
@@ -309,7 +318,14 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+      
+      {/* Paywall Modal för CV-begränsning */}
+      <PaywallModal 
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        type="cvLimit"
+      />
+    </AppLayout>
   )
 }
 

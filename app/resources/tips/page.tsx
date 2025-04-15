@@ -3,6 +3,7 @@
 import { FadeIn } from "@/components/animations/FadeIn"
 import { ScrollReveal } from "@/components/animations/ScrollReveal"
 import { StaggerChildren } from "@/components/animations/StaggerChildren"
+import { MetaTags } from "@/components/MetaTags"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
@@ -182,123 +183,131 @@ export default function TipsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
-      <div className="container max-w-6xl py-12 mx-auto px-4 sm:px-6">
-        <FadeIn direction="down" duration={0.6}>
-          <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-            CV-tips för en framgångsrik jobbansökan
-          </h1>
-          
-          <p className="text-xl text-muted-foreground mt-4 mb-12 text-center max-w-3xl mx-auto">
-            Våra experttips för att skapa ett CV som skiljer sig från mängden och hjälper dig att landa ditt drömjobb
-          </p>
-        </FadeIn>
+    <>
+      <MetaTags 
+        title="CV-tips och råd för framgångsrika jobbansökningar"
+        description="Expertråd och tips för att skapa ett effektivt CV som hjälper dig att sticka ut bland andra sökande och landa ditt drömjobb."
+        keywords="cv-tips, jobbansökan, hur skriva cv, cv-mallar, cv-optimering, ats-optimering, professionellt cv"
+        ogUrl="https://cverktyg.se/resources/tips"
+      />
+      <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
+        <div className="container max-w-6xl py-12 mx-auto px-4 sm:px-6">
+          <FadeIn direction="down" duration={0.6}>
+            <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              CV-tips för en framgångsrik jobbansökan
+            </h1>
+            
+            <p className="text-xl text-muted-foreground mt-4 mb-12 text-center max-w-3xl mx-auto">
+              Våra experttips för att skapa ett CV som skiljer sig från mängden och hjälper dig att landa ditt drömjobb
+            </p>
+          </FadeIn>
 
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {tipCards.map((card, index) => (
-            <div key={index} className="h-full">
-              <Card className={`h-full group hover:-translate-y-1 transition-all duration-300 overflow-hidden border-l-4 ${card.borderColor} hover:shadow-lg`}>
-                <div className="p-6 h-full flex flex-col">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className={`${card.bgColor} p-3 rounded-full transition-transform duration-300 group-hover:scale-110`}>
-                      {card.icon}
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            {tipCards.map((card, index) => (
+              <div key={index} className="h-full">
+                <Card className={`h-full group hover:-translate-y-1 transition-all duration-300 overflow-hidden border-l-4 ${card.borderColor} hover:shadow-lg`}>
+                  <div className="p-6 h-full flex flex-col">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className={`${card.bgColor} p-3 rounded-full transition-transform duration-300 group-hover:scale-110`}>
+                        {card.icon}
+                      </div>
+                      <h2 className="text-xl font-bold">{card.title}</h2>
                     </div>
-                    <h2 className="text-xl font-bold">{card.title}</h2>
-                  </div>
-                  
-                  <p className="text-muted-foreground mb-6 flex-grow">
-                    {card.description}
-                  </p>
-                  
-                  {card.hasModal ? (
-                    <Dialog open={openDialogs[index]} onOpenChange={(open) => handleOpenChange(index, open)}>
-                      <DialogTrigger asChild>
-                        <button className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors">
-                          Läs mer <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
-                        </button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                          <DialogTitle className="text-2xl mb-2 text-blue-600">{card.title}</DialogTitle>
-                          <DialogDescription className="text-base">
-                            {card.modalDescription}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="mt-6 divide-y">
-                          {card.modalContent?.map((item, i) => (
-                            <div key={i} className="py-4 first:pt-0 last:pb-0">
-                              <div className="flex gap-2 items-start">
-                                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <h3 className="font-semibold mb-1">{item.title}</h3>
-                                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                    
+                    <p className="text-muted-foreground mb-6 flex-grow">
+                      {card.description}
+                    </p>
+                    
+                    {card.hasModal ? (
+                      <Dialog open={openDialogs[index]} onOpenChange={(open) => handleOpenChange(index, open)}>
+                        <DialogTrigger asChild>
+                          <button className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                            Läs mer <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl mb-2 text-blue-600">{card.title}</DialogTitle>
+                            <DialogDescription className="text-base">
+                              {card.modalDescription}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="mt-6 divide-y">
+                            {card.modalContent?.map((item, i) => (
+                              <div key={i} className="py-4 first:pt-0 last:pb-0">
+                                <div className="flex gap-2 items-start">
+                                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <div>
+                                    <h3 className="font-semibold mb-1">{item.title}</h3>
+                                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  ) : card.isExternal ? (
-                    <a 
-                      href={card.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                    >
-                      Läs extern guide <ExternalLink className="h-4 w-4 ml-1" />
-                    </a>
-                  ) : (
-                    <Link 
-                      href={card.link} 
-                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                    >
-                      Läs mer <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  )}
-                </div>
-              </Card>
-            </div>
-          ))}
-        </StaggerChildren>
+                            ))}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ) : card.isExternal ? (
+                      <a 
+                        href={card.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                      >
+                        Läs extern guide <ExternalLink className="h-4 w-4 ml-1" />
+                      </a>
+                    ) : (
+                      <Link 
+                        href={card.link} 
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                      >
+                        Läs mer <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            ))}
+          </StaggerChildren>
 
-        <ScrollReveal className="my-20">
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800/90 p-8 sm:p-10">
-            <div className="absolute inset-0 bg-grid-slate-200 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.5))] dark:bg-grid-slate-800/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"></div>
-            <div className="relative">
-              <h2 className="text-3xl font-bold mb-8 text-center">Expertråd för din jobbsökning</h2>
-              
-              <div className="space-y-6">
-                {experttips.map((tip, index) => (
-                  <ScrollReveal key={index} direction="up" delay={index * 0.1} className="border-b last:border-0 pb-5 last:pb-0">
-                    <h3 className="text-xl font-bold mb-2">{tip.title}</h3>
-                    <p className="text-muted-foreground">{tip.description}</p>
-                  </ScrollReveal>
-                ))}
+          <ScrollReveal className="my-20">
+            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800/90 p-8 sm:p-10">
+              <div className="absolute inset-0 bg-grid-slate-200 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.5))] dark:bg-grid-slate-800/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"></div>
+              <div className="relative">
+                <h2 className="text-3xl font-bold mb-8 text-center">Expertråd för din jobbsökning</h2>
+                
+                <div className="space-y-6">
+                  {experttips.map((tip, index) => (
+                    <ScrollReveal key={index} direction="up" delay={index * 0.1} className="border-b last:border-0 pb-5 last:pb-0">
+                      <h3 className="text-xl font-bold mb-2">{tip.title}</h3>
+                      <p className="text-muted-foreground">{tip.description}</p>
+                    </ScrollReveal>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
 
-        <FadeIn className="mt-20 mb-10">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-10 text-white text-center relative overflow-hidden shadow-lg">
-            <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-20"></div>
-            <div className="relative z-10">
-              <h2 className="text-3xl font-bold mb-4">Redo att förbättra ditt CV?</h2>
-              <p className="text-xl mb-8 max-w-2xl mx-auto">
-                Använd vårt verktyg för att skapa ett professionellt CV som hjälper dig att stå ut från mängden
-              </p>
-              <Button 
-                size="lg" 
-                className="bg-white text-blue-600 hover:bg-blue-50 hover:scale-105 transition-all duration-300"
-                asChild
-              >
-                <Link href="/editor">Skapa ditt CV nu</Link>
-              </Button>
+          <FadeIn className="mt-20 mb-10">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-10 text-white text-center relative overflow-hidden shadow-lg">
+              <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-20"></div>
+              <div className="relative z-10">
+                <h2 className="text-3xl font-bold mb-4">Redo att förbättra ditt CV?</h2>
+                <p className="text-xl mb-8 max-w-2xl mx-auto">
+                  Använd vårt verktyg för att skapa ett professionellt CV som hjälper dig att stå ut från mängden
+                </p>
+                <Button 
+                  size="lg" 
+                  className="bg-white text-blue-600 hover:bg-blue-50 hover:scale-105 transition-all duration-300"
+                  asChild
+                >
+                  <Link href="/editor">Skapa ditt CV nu</Link>
+                </Button>
+              </div>
             </div>
-          </div>
-        </FadeIn>
+          </FadeIn>
+        </div>
       </div>
-    </div>
+    </>
   )
 } 

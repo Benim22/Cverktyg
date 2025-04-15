@@ -61,7 +61,10 @@ export const createServerClient = () => {
 
 // För användning i klientkomponenter
 export const getSupabaseClient = () => {
-  return createClientComponentClient();
+  return createClientComponentClient({
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  });
 };
 
 // Funktion för att köra databasoperationer som admin
@@ -92,13 +95,44 @@ export const getUserCVs = async (userId: string) => {
  * Hämtar ett specifikt CV
  */
 export const getCV = async (cvId: string, userId: string) => {
-  const supabase = getSupabaseClient();
-  return await supabase
-    .from('cvs')
-    .select('*')
-    .eq('id', cvId)
-    .eq('user_id', userId)
-    .single();
+  if (!cvId || !userId) {
+    return { 
+      data: null, 
+      error: new Error('CV-ID och användar-ID måste anges') 
+    };
+  }
+
+  try {
+    const supabase = getSupabaseClient();
+    
+    // Kontrollera att anslutningen fungerar
+    if (!supabase) {
+      console.error('Supabase-klienten kunde inte skapas');
+      return {
+        data: null,
+        error: new Error('Kunde inte ansluta till databasen')
+      };
+    }
+
+    const response = await supabase
+      .from('cvs')
+      .select('*')
+      .eq('id', cvId)
+      .eq('user_id', userId)
+      .single();
+    
+    if (response.error) {
+      console.error('Supabase query error:', response.error, 'Details:', JSON.stringify(response.error));
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Unexpected error in getCV:', error, 'Details:', typeof error === 'object' ? JSON.stringify(error) : error);
+    return { 
+      data: null, 
+      error: error instanceof Error ? error : new Error('Ett oväntat fel uppstod vid hämtning av CV') 
+    };
+  }
 };
 
 /**

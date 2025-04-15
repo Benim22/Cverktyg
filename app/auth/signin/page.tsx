@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { motion } from "framer-motion"
+import { MetaTags } from "@/components/MetaTags"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -82,40 +83,120 @@ export default function SignIn() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <h1 className="mb-2 text-2xl font-bold">Välkommen tillbaka!</h1>
-      <p className="mb-8 text-muted-foreground">Logga in på ditt konto för att fortsätta.</p>
-      
-      <Tabs defaultValue="password" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="password">Lösenord</TabsTrigger>
-          <TabsTrigger value="magic-link">Magisk länk</TabsTrigger>
-        </TabsList>
+    <>
+      <MetaTags 
+        title="Logga in - CVerktyg"
+        description="Logga in på ditt CVerktyg-konto för att skapa, redigera och hantera dina professionella CV:n. Enkel inloggning med e-post och lösenord eller magisk länk."
+        keywords="logga in, inloggning, cv konto, cv verktyg, cv builder login"
+        ogUrl="https://cverktyg.se/auth/signin"
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h1 className="mb-2 text-2xl font-bold">Välkommen tillbaka!</h1>
+        <p className="mb-8 text-muted-foreground">Logga in på ditt konto för att fortsätta.</p>
         
-        <TabsContent value="password">
-          <Card>
-            <form onSubmit={handleSignIn}>
-              <CardContent className="pt-6 space-y-4">
-                {error && (
-                  <Alert variant="destructive" className="text-sm">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+        <Tabs defaultValue="password" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="password">Lösenord</TabsTrigger>
+            <TabsTrigger value="magic-link">Magisk länk</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="password">
+            <Card>
+              <form onSubmit={handleSignIn}>
+                <CardContent className="pt-6 space-y-4">
+                  {error && (
+                    <Alert variant="destructive" className="text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Label htmlFor="email">E-postadress</Label>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          <Mail className="h-4 w-4" />
+                        </span>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="namn@exempel.se"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Lösenord</Label>
+                        <Link href="/auth/reset" className="text-xs text-primary hover:underline">
+                          Glömt lösenordet?
+                        </Link>
+                      </div>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          <Lock className="h-4 w-4" />
+                        </span>
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
                 
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Label htmlFor="email">E-postadress</Label>
-                    <div className="relative mt-1">
+                <CardFooter className="flex flex-col gap-4">
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Loggar in..." : "Logga in"}
+                  </Button>
+                  
+                  <p className="text-center text-sm text-muted-foreground">
+                    Har du inget konto?{" "}
+                    <Link href="/auth/signup" className="text-primary hover:underline">
+                      Registrera dig här
+                    </Link>
+                  </p>
+                </CardFooter>
+              </form>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="magic-link">
+            <Card>
+              <form onSubmit={handleMagicLink}>
+                <CardContent className="pt-6 space-y-4">
+                  {error && (
+                    <Alert 
+                      variant={error.includes("skickat") ? "default" : "destructive"} 
+                      className={cn("text-sm", error.includes("skickat") && "border-green-500 text-green-500")}
+                    >
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email-magic">E-postadress</Label>
+                    <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                         <Mail className="h-4 w-4" />
                       </span>
                       <Input
-                        id="email"
+                        id="email-magic"
                         type="email"
                         placeholder="namn@exempel.se"
                         value={email}
@@ -124,101 +205,29 @@ export default function SignIn() {
                         required
                       />
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Vi skickar en magisk länk till din e-post. Klicka på länken för att logga in utan lösenord.
+                    </p>
                   </div>
+                </CardContent>
+                
+                <CardFooter className="flex flex-col gap-4">
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Skickar..." : "Skicka magisk länk"}
+                  </Button>
                   
-                  <div className="relative">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Lösenord</Label>
-                      <Link href="/auth/reset" className="text-xs text-primary hover:underline">
-                        Glömt lösenordet?
-                      </Link>
-                    </div>
-                    <div className="relative mt-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        <Lock className="h-4 w-4" />
-                      </span>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              
-              <CardFooter className="flex flex-col gap-4">
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Loggar in..." : "Logga in"}
-                </Button>
-                
-                <p className="text-center text-sm text-muted-foreground">
-                  Har du inget konto?{" "}
-                  <Link href="/auth/signup" className="text-primary hover:underline">
-                    Registrera dig här
-                  </Link>
-                </p>
-              </CardFooter>
-            </form>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="magic-link">
-          <Card>
-            <form onSubmit={handleMagicLink}>
-              <CardContent className="pt-6 space-y-4">
-                {error && (
-                  <Alert 
-                    variant={error.includes("skickat") ? "default" : "destructive"} 
-                    className={cn("text-sm", error.includes("skickat") && "border-green-500 text-green-500")}
-                  >
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email-magic">E-postadress</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      <Mail className="h-4 w-4" />
-                    </span>
-                    <Input
-                      id="email-magic"
-                      type="email"
-                      placeholder="namn@exempel.se"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Vi skickar en magisk länk till din e-post. Klicka på länken för att logga in utan lösenord.
+                  <p className="text-center text-sm text-muted-foreground">
+                    Har du inget konto?{" "}
+                    <Link href="/auth/signup" className="text-primary hover:underline">
+                      Registrera dig här
+                    </Link>
                   </p>
-                </div>
-              </CardContent>
-              
-              <CardFooter className="flex flex-col gap-4">
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Skickar..." : "Skicka magisk länk"}
-                </Button>
-                
-                <p className="text-center text-sm text-muted-foreground">
-                  Har du inget konto?{" "}
-                  <Link href="/auth/signup" className="text-primary hover:underline">
-                    Registrera dig här
-                  </Link>
-                </p>
-              </CardFooter>
-            </form>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </motion.div>
+                </CardFooter>
+              </form>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+    </>
   )
 } 

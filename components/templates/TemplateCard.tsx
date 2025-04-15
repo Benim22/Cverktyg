@@ -5,10 +5,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Image from "next/image"
 import type { CVTemplate } from "@/types/cv"
 import { motion } from "framer-motion"
-import { CheckCircle2, FileText, Layout } from "lucide-react"
+import { CheckCircle2, FileText, Layout, LockIcon, SparklesIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { CheckIcon } from "lucide-react"
 import { useState } from "react"
+import { useSubscription } from "@/contexts/SubscriptionContext"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface TemplateCardProps {
   template: CVTemplate
@@ -18,6 +20,9 @@ interface TemplateCardProps {
 
 export function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
   const [imageError, setImageError] = useState(false)
+  const { isPremiumPlan } = useSubscription()
+  const hasPremiumAccess = isPremiumPlan()
+  const isPremiumTemplate = template.isPremium === true
 
   // Formatera mall-layout till användarvänlig text
   const getLayoutLabel = (layout: string) => {
@@ -32,9 +37,27 @@ export function TemplateCard({ template, isSelected, onSelect }: TemplateCardPro
         return "Kreativ";
       case "professional":
         return "Professionell";
+      case "executive":
+        return "Executive";
+      case "academic":
+        return "Akademisk";
+      case "technical":
+        return "Teknisk";
       default:
         return layout.charAt(0).toUpperCase() + layout.slice(1);
     }
+  };
+
+  // Funktion för att hantera val av mall - kontrollera premium-åtkomst
+  const handleSelectTemplate = () => {
+    // Kontrollera om användaren försöker välja en premium-mall utan att ha åtkomst
+    if (isPremiumTemplate && !hasPremiumAccess) {
+      // Här kan vi visa en tooltip eller dialog om premium-krav
+      return;
+    }
+    
+    // Annars aktivera vald mall
+    onSelect();
   };
 
   // Generera en professionell förhandsgranskning baserad på malltyp
@@ -348,13 +371,34 @@ export function TemplateCard({ template, isSelected, onSelect }: TemplateCardPro
 
   return (
     <Card className={`relative cursor-pointer border-2 transition-all duration-300 cv-template-hover ${isSelected ? "border-primary" : "border-border"}`}>
+      {/* Premium-badge visas endast på premium-mallar */}
+      {isPremiumTemplate && (
+        <div className="absolute top-2 right-2 z-10">
+          <Badge variant="secondary" className="bg-gradient-to-r from-amber-200 to-yellow-400 text-amber-900 border-amber-400">
+            <SparklesIcon className="h-3 w-3 mr-1" />
+            Premium
+          </Badge>
+        </div>
+      )}
+      
       <CardContent className="p-0 aspect-[210/297] relative overflow-hidden">
+        {/* Overlay för premium-mallar som användaren inte har åtkomst till */}
+        {isPremiumTemplate && !hasPremiumAccess && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+            <LockIcon className="h-8 w-8 text-white/90 mb-2" />
+            <p className="text-white text-center font-medium">Premium-mall</p>
+            <p className="text-white/80 text-center text-sm px-4 mt-1">
+              Kräver prenumeration
+            </p>
+          </div>
+        )}
+        
         {template.previewImage && !imageError ? (
           <Image
             src={template.previewImage}
             alt={template.name}
             fill
-            className="object-cover"
+            className={`object-cover ${isPremiumTemplate && !hasPremiumAccess ? "blur-sm" : ""}`}
             onError={() => setImageError(true)}
           />
         ) : (
@@ -362,9 +406,12 @@ export function TemplateCard({ template, isSelected, onSelect }: TemplateCardPro
             <Layout className="h-12 w-12 text-muted-foreground opacity-50" />
           </div>
         )}
-        <div className={`preview-fallback ${imageError || !template.previewImage ? "block" : "hidden"}`}>
-          {generatePreviewBackground()}
-        </div>
+        {/* Visa endast fallback-förhandsgranskning om bilden saknas eller ger fel */}
+        {(imageError || !template.previewImage) && (
+          <div className="preview-fallback">
+            {generatePreviewBackground()}
+          </div>
+        )}
         
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 text-center">
           <Badge variant="outline" className="mb-2">
@@ -372,24 +419,47 @@ export function TemplateCard({ template, isSelected, onSelect }: TemplateCardPro
           </Badge>
           <h3 className="font-medium text-lg">{template.name}</h3>
           <p className="text-sm text-muted-foreground mb-auto mt-2">{template.description}</p>
-          <Button 
-            variant={isSelected ? "default" : "outline"} 
-            size="sm" 
-            className="mt-2" 
-            onClick={onSelect}
-          >
-            {isSelected ? (
-              <>
-                <CheckIcon className="mr-2 h-4 w-4" />
-                Vald
-              </>
-            ) : "Välj mall"}
-          </Button>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button 
+                    variant={isSelected ? "default" : "outline"} 
+                    size="sm" 
+                    className="mt-2" 
+                    onClick={handleSelectTemplate}
+                    disabled={isPremiumTemplate && !hasPremiumAccess}
+                  >
+                    {isSelected ? (
+                      <>
+                        <CheckIcon className="mr-2 h-4 w-4" />
+                        Vald
+                      </>
+                    ) : isPremiumTemplate && !hasPremiumAccess ? (
+                      <>
+                        <LockIcon className="mr-2 h-4 w-4" />
+                        Premium
+                      </>
+                    ) : "Välj mall"}
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              {isPremiumTemplate && !hasPremiumAccess && (
+                <TooltipContent>
+                  <p>Uppgradera till premium för åtkomst till denna mall</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </CardContent>
       <CardFooter className="p-2 flex justify-between items-center">
-        <div>
+        <div className="flex items-center">
           <h3 className="font-medium text-sm">{template.name}</h3>
+          {isPremiumTemplate && (
+            <SparklesIcon className="h-3 w-3 ml-1 text-amber-500" />
+          )}
         </div>
         {isSelected && (
           <Badge variant="secondary" className="ml-auto">

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Mail, Lock, User, AlertCircle } from "lucide-react"
+import { MetaTags } from "@/components/MetaTags"
 
 export default function SignUp() {
   const [email, setEmail] = useState("")
@@ -74,40 +75,84 @@ export default function SignUp() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <h1 className="mb-2 text-2xl font-bold">Skapa ett konto</h1>
-      <p className="mb-8 text-muted-foreground">Börja skapa ditt professionella CV idag!</p>
-      
-      <Card>
-        <form onSubmit={handleSignUp}>
-          <CardContent className="pt-6 space-y-4">
-            {error && (
-              <Alert 
-                variant={error.includes("bekräftelse") ? "default" : "destructive"} 
-                className={error.includes("bekräftelse") ? "border-green-500 text-green-500" : ""}
-              >
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            <div className="grid grid-cols-2 gap-4">
+    <>
+      <MetaTags 
+        title="Skapa konto - CVerktyg"
+        description="Registrera ett nytt konto hos CVerktyg för att börja skapa professionella CV:n med våra användarvänliga mallar och verktyg. Gratis att komma igång."
+        keywords="skapa konto, registrera, cv-tjänst, gratis cv-mall, cv-verktyg, jobbansökan"
+        ogUrl="https://cverktyg.se/auth/signup"
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h1 className="mb-2 text-2xl font-bold">Skapa ett konto</h1>
+        <p className="mb-8 text-muted-foreground">Börja skapa ditt professionella CV idag!</p>
+        
+        <Card>
+          <form onSubmit={handleSignUp}>
+            <CardContent className="pt-6 space-y-4">
+              {error && (
+                <Alert 
+                  variant={error.includes("bekräftelse") ? "default" : "destructive"} 
+                  className={error.includes("bekräftelse") ? "border-green-500 text-green-500" : ""}
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Förnamn</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      <User className="h-4 w-4" />
+                    </span>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Förnamn"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Efternamn</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      <User className="h-4 w-4" />
+                    </span>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Efternamn"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="firstName">Förnamn</Label>
+                <Label htmlFor="email">E-postadress</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    <User className="h-4 w-4" />
+                    <Mail className="h-4 w-4" />
                   </span>
                   <Input
-                    id="firstName"
-                    type="text"
-                    placeholder="Förnamn"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    id="email"
+                    type="email"
+                    placeholder="namn@exempel.se"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
                   />
@@ -115,97 +160,61 @@ export default function SignUp() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="lastName">Efternamn</Label>
+                <Label htmlFor="password">Lösenord</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    <User className="h-4 w-4" />
+                    <Lock className="h-4 w-4" />
                   </span>
                   <Input
-                    id="lastName"
-                    type="text"
-                    placeholder="Efternamn"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    id="password"
+                    type="password"
+                    placeholder="Minst 6 tecken"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
                     required
+                    minLength={6}
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Lösenordet måste vara minst 6 tecken långt.
+                </p>
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">E-postadress</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                </span>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="namn@exempel.se"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
+              
+              <div className="flex items-start space-x-2 pt-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={agreedToTerms}
+                  onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
                 />
+                <Label htmlFor="terms" className="text-sm leading-tight">
+                  Jag godkänner{" "}
+                  <Link href="/terms" className="text-primary hover:underline">
+                    användarvillkoren
+                  </Link>{" "}
+                  och{" "}
+                  <Link href="/privacy" className="text-primary hover:underline">
+                    integritetspolicyn
+                  </Link>
+                </Label>
               </div>
-            </div>
+            </CardContent>
             
-            <div className="space-y-2">
-              <Label htmlFor="password">Lösenord</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  <Lock className="h-4 w-4" />
-                </span>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Minst 6 tecken"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                  minLength={6}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Lösenordet måste vara minst 6 tecken långt.
-              </p>
-            </div>
-            
-            <div className="flex items-start space-x-2 pt-2">
-              <Checkbox 
-                id="terms" 
-                checked={agreedToTerms}
-                onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
-              />
-              <Label htmlFor="terms" className="text-sm leading-tight">
-                Jag godkänner{" "}
-                <Link href="/terms" className="text-primary hover:underline">
-                  användarvillkoren
-                </Link>{" "}
-                och{" "}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  integritetspolicyn
+            <CardFooter className="flex flex-col gap-4">
+              <Button type="submit" className="w-full" disabled={loading || !agreedToTerms}>
+                {loading ? "Skapar konto..." : "Skapa konto"}
+              </Button>
+              
+              <p className="text-center text-sm text-muted-foreground">
+                Har du redan ett konto?{" "}
+                <Link href="/auth/signin" className="text-primary hover:underline">
+                  Logga in här
                 </Link>
-              </Label>
-            </div>
-          </CardContent>
-          
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={loading || !agreedToTerms}>
-              {loading ? "Skapar konto..." : "Skapa konto"}
-            </Button>
-            
-            <p className="text-center text-sm text-muted-foreground">
-              Har du redan ett konto?{" "}
-              <Link href="/auth/signin" className="text-primary hover:underline">
-                Logga in här
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
-    </motion.div>
+              </p>
+            </CardFooter>
+          </form>
+        </Card>
+      </motion.div>
+    </>
   )
 } 

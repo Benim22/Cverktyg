@@ -13,7 +13,9 @@ export const CV_TEMPLATES: CVTemplate[] = [
       headingFont: "Inter, sans-serif",
       bodyFont: "Inter, sans-serif",
       fontSize: "medium"
-    }
+    },
+    category: "business",
+    isPremium: false
   },
   {
     id: "modern",
@@ -34,7 +36,9 @@ export const CV_TEMPLATES: CVTemplate[] = [
       headingFont: "Montserrat, sans-serif",
       bodyFont: "Roboto, sans-serif",
       fontSize: "medium"
-    }
+    },
+    category: "business",
+    isPremium: false
   },
   {
     id: "minimalist",
@@ -55,7 +59,9 @@ export const CV_TEMPLATES: CVTemplate[] = [
       headingFont: "DM Sans, sans-serif",
       bodyFont: "DM Sans, sans-serif",
       fontSize: "small"
-    }
+    },
+    category: "creative",
+    isPremium: false
   },
   {
     id: "creative",
@@ -76,7 +82,9 @@ export const CV_TEMPLATES: CVTemplate[] = [
       headingFont: "Poppins, sans-serif",
       bodyFont: "Nunito, sans-serif",
       fontSize: "medium"
-    }
+    },
+    category: "creative",
+    isPremium: false
   },
   {
     id: "professional",
@@ -97,6 +105,101 @@ export const CV_TEMPLATES: CVTemplate[] = [
       headingFont: "Merriweather, serif",
       bodyFont: "Source Sans Pro, sans-serif",
       fontSize: "medium"
-    }
+    },
+    category: "business",
+    isPremium: false
+  },
+  // PREMIUM MALLAR
+  {
+    id: "executive",
+    name: "Executive",
+    description: "Premium-mall för ledande befattningar och höga chefspositioner",
+    previewImage: "/images/templates/executive-preview.png",
+    layout: "executive",
+    colorScheme: {
+      primaryColor: "#1e293b", // Mörkblå/grå
+      secondaryColor: "#334155", // Mörkgrå
+      headingColor: "#0f172a", // Nästan svart
+      subHeadingColor: "#1e293b", // Mörkblå/grå
+      textColor: "#334155", // Mörkgrå
+      backgroundColor: "#f8fafc", // Ljusgrå
+      accentColor: "#c2410c", // Mörkorange
+    },
+    fontSettings: {
+      headingFont: "Playfair Display, serif",
+      bodyFont: "Lato, sans-serif",
+      fontSize: "medium"
+    },
+    category: "business", 
+    isPremium: true
+  },
+  {
+    id: "academic",
+    name: "Akademisk",
+    description: "Specialanpassad för akademiker, forskare och utbildningsprofessioner",
+    previewImage: "/images/templates/academic-preview.png",
+    layout: "academic",
+    colorScheme: {
+      primaryColor: "#5b21b6", // Mörklila
+      secondaryColor: "#7c3aed", // Lila
+      headingColor: "#1e293b", // Mörkgrå
+      subHeadingColor: "#334155", // Mörkgrå
+      textColor: "#475569", // Grå
+      backgroundColor: "#f8fafc", // Ljusgrå
+      accentColor: "#9333ea", // Ljuslila
+    },
+    fontSettings: {
+      headingFont: "Merriweather, serif",
+      bodyFont: "Merriweather Sans, sans-serif",
+      fontSize: "medium"
+    },
+    category: "academic",
+    isPremium: true
+  },
+  {
+    id: "technical",
+    name: "Teknisk",
+    description: "Optimerad för ingenjörer, utvecklare och andra tekniska roller",
+    previewImage: "/images/templates/technical-preview.png",
+    layout: "technical",
+    colorScheme: {
+      primaryColor: "#0f172a", // Mörkblå
+      secondaryColor: "#1e293b", // Mörkgrå
+      headingColor: "#0f172a", // Mörkblå
+      subHeadingColor: "#1e293b", // Mörkgrå
+      textColor: "#475569", // Grå
+      backgroundColor: "#f8fafc", // Ljusgrå
+      accentColor: "#0ea5e9", // Ljusblå
+    },
+    fontSettings: {
+      headingFont: "JetBrains Mono, monospace",
+      bodyFont: "Inter, sans-serif",
+      fontSize: "small"
+    },
+    category: "technical",
+    isPremium: true
+  },
+  {
+    id: "nordic",
+    name: "Nordic",
+    description: "Exklusiv nordisk design med elegant skandinavisk minimalism",
+    previewImage: "/images/templates/nordic-preview.png",
+    layout: "minimalist",
+    colorScheme: {
+      primaryColor: "#2e3440", // Nordiskt mörkblå
+      secondaryColor: "#4c566a", // Nordiskt grå
+      headingColor: "#2e3440", // Nordiskt mörkblå
+      subHeadingColor: "#3b4252", // Mörkgrå
+      textColor: "#4c566a", // Nordiskt grå
+      backgroundColor: "#eceff4", // Ljusgrå bakgrund
+      accentColor: "#81a1c1", // Nordiskt ljusblå
+    },
+    fontSettings: {
+      headingFont: "Inter, sans-serif",
+      bodyFont: "Inter, sans-serif",
+      fontSize: "small"
+    },
+    category: "creative",
+    isPremium: true
   }
 ] 

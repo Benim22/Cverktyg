@@ -76,7 +76,7 @@ export interface CVTemplate {
   name: string
   description: string
   previewImage: string
-  layout: "standard" | "modern" | "minimalist" | "creative" | "professional"
+  layout: "standard" | "modern" | "minimalist" | "creative" | "professional" | "executive" | "academic" | "technical"
   colorScheme: CVColorScheme
   fontSettings?: {
     headingFont: string
@@ -84,6 +84,8 @@ export interface CVTemplate {
     fontSize: "small" | "medium" | "large"
   }
   sectionOrder?: string[] // Ordningen på sektioner
+  isPremium?: boolean // Indikerar om mallen endast är tillgänglig för premiumanvändare
+  category?: "business" | "creative" | "academic" | "technical" // Kategorisering av mallen
 }
 
 export interface CV {

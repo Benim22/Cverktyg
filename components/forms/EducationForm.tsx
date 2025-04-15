@@ -307,6 +307,10 @@ export function EducationForm({ sectionId, items = [], isAdding = false }: Educa
                     {...field}
                   />
                 </FormControl>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Tips: Inkludera viktiga kurser, projekt, eventuella utmärkelser och färdigheter du utvecklade.
+                  Exempel: "Specialiserade mig inom datavetenskap med fokus på maskininlärning. Avslutade med examensarbete om prediktiv analys."
+                </p>
                 <FormMessage />
               </FormItem>
             )}
