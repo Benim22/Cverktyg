@@ -52,6 +52,31 @@ export default function Home() {
                 </div>
               </FadeIn>
 
+              {/* Hero Video */}
+              <FadeIn delay={0.35}>
+                <div className="mt-10 mb-4 w-full max-w-4xl mx-auto">
+                  <h3 className="text-xl font-semibold mb-4">Se hur CVerktyg fungerar</h3>
+                  <div className="rounded-xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-700">
+                    <video 
+                      className="w-full h-auto"
+                      controls
+                      autoPlay 
+                      loop 
+                      muted 
+                      playsInline
+                      poster="/placeholder.jpg"
+                    >
+                      <source 
+                        src="https://videocdn.cdnpk.net/videos/b0969803-680e-5ec0-934a-608eac10c3fc/horizontal/previews/clear/large.mp4?token=exp=1744741649~hmac=8bd5da2d8fe48c0d8e730ad503ea56033b9b313c9616b3c01d873532f3c31044" 
+                        type="video/mp4" 
+                      />
+                      Din webbläsare stödjer inte videouppspelning.
+                    </video>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">Se hur CVerktyg hjälper dig skapa professionella CV:n på bara några minuter.</p>
+                </div>
+              </FadeIn>
+
               {/* Trust badges */}
               <FadeIn delay={0.4}>
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-6">
