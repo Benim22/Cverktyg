@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 export async function GET() {
   try {
     // Få access till Supabase serversidan
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     
     // Hämta användarens session

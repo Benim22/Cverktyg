@@ -1,16 +1,23 @@
 "use client"
 
 import { useCV } from "@/contexts/CVContext"
-import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
-import { motion } from "framer-motion"
-import { LoadingSpinner } from "@/components/animations/LoadingSpinner"
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
 import { useSubscription } from "@/contexts/SubscriptionContext"
 import { PaywallModal } from "@/components/PaywallModal"
+import { PDFExportButton } from "@/components/PDFExportButton"
+import { ReactPDFExporter } from "@/components/ReactPDFExporter"
+import { 
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger 
+} from "@/components/ui/tabs"
+
+// Definiera typdeklarationen för html2pdf om det behövs senare
+// declare module 'html2pdf.js';
 
 export function PDFExporter() {
   const { currentCV } = useCV()
@@ -18,6 +25,7 @@ export function PDFExporter() {
   const [isExporting, setIsExporting] = useState(false)
   const [showPaywall, setShowPaywall] = useState(false)
   const { toast } = useToast()
+  const [exportMethod, setExportMethod] = useState<string>("original")
 
   const handleExportClick = () => {
     if (!currentCV) {
@@ -26,15 +34,16 @@ export function PDFExporter() {
         description: "Inget CV att exportera",
         variant: "destructive",
       })
-      return
+      return Promise.reject(new Error("Inget CV att exportera"))
     }
 
     // Kontrollera om användaren har behörighet att exportera utan vattenstämpel
     if (!canExportWithoutWatermark()) {
       setShowPaywall(true)
+      return Promise.reject(new Error("Behörighet saknas"))
     } else {
       // Om användaren har behörighet, fortsätt direkt till export
-      handleExport(false)
+      return handleExport(false)
     }
   }
 
@@ -45,7 +54,7 @@ export function PDFExporter() {
         description: "Inget CV att exportera",
         variant: "destructive",
       })
-      return
+      return Promise.reject(new Error("Inget CV att exportera"))
     }
 
     setIsExporting(true)
@@ -58,6 +67,9 @@ export function PDFExporter() {
         throw new Error("Kunde inte hitta CV-elementet")
       }
 
+      // Kontrollera om vi är i preview-läge
+      const isPreviewMode = cvElement.dataset.pageMode === 'preview'
+      
       // Visa toast för att informera användaren
       toast({
         title: "Förbereder PDF",
@@ -70,34 +82,170 @@ export function PDFExporter() {
         colorEditorButton.style.display = "none"
       }
       
-      // Spara originalstilarna
-      const originalPosition = cvElement.style.position
-      const originalMaxHeight = cvElement.style.maxHeight
-      const originalOverflow = cvElement.style.overflow
+      // Skapa en klon av CV-elementet så vi kan modifiera den utan att ändra originalet
+      const clonedCV = cvElement.cloneNode(true) as HTMLElement
+      document.body.appendChild(clonedCV)
       
-      // Tillfälligt ändra stilar för bättre rendering
-      cvElement.style.position = "relative"
-      cvElement.style.maxHeight = "none"
-      cvElement.style.overflow = "visible"
+      // Sätt stilar för klonen för optimal rendering
+      clonedCV.style.position = "absolute"
+      clonedCV.style.top = "-9999px"
+      clonedCV.style.left = "-9999px"
+      clonedCV.style.width = "794px" // A4 bredd i pixlar (210mm)
+      clonedCV.style.height = "auto"
+      clonedCV.style.maxHeight = "none"
+      clonedCV.style.overflow = "visible"
+      clonedCV.style.backgroundColor = "white"
+      clonedCV.style.textAlign = "left"
       
-      // Skapa en canvas från CV-elementet
-      const canvas = await html2canvas(cvElement, {
-        scale: 2, // Högre upplösning
-        useCORS: true, // Tillåt bilder från andra domäner
-        logging: false,
-        backgroundColor: null,
+      // Säkerställ att alla sektioner är synliga
+      const allSections = clonedCV.querySelectorAll('[class*="section"]');
+      allSections.forEach((section: any) => {
+        if (section.style) {
+          section.style.display = 'block';
+          section.style.visibility = 'visible';
+          section.style.height = 'auto';
+          section.style.overflow = 'visible';
+        }
+      });
+      
+      // Säkerställ att alla CV-sektioner (utbildning, erfarenhet, projekt, etc.) är synliga
+      const cvSections = clonedCV.querySelectorAll('.cv-section-title, .cv-skills-grid, .cv-education-header, .cv-experience-header');
+      cvSections.forEach((element: any) => {
+        if (element.style) {
+          element.style.display = element.classList.contains('cv-skills-grid') ? 'grid' : 'block';
+          element.style.visibility = 'visible';
+        }
+      });
+      
+      // Ta bort eventuella interaktiva delar som inte ska vara med i PDF:en
+      const editorElements = clonedCV.querySelectorAll('.color-editor, .color-editor-button')
+      editorElements.forEach(el => {
+        if (el.parentNode) {
+          el.parentNode.removeChild(el)
+        }
       })
       
-      // Återställ originalstilarna
-      cvElement.style.position = originalPosition
-      cvElement.style.maxHeight = originalMaxHeight
-      cvElement.style.overflow = originalOverflow
-      
-      // Återställ färgredigeringsknappen
-      if (colorEditorButton) {
-        colorEditorButton.style.display = ""
+      // Fixa ikonerna i personlig information med kraftfull justering
+      const contactIcons = clonedCV.querySelectorAll(".personal-info-icon") as NodeListOf<HTMLElement>
+      if (contactIcons.length > 0) {
+        contactIcons.forEach(icon => {
+          // Fixa container-styling för korrekt centrering
+          icon.style.display = "flex"
+          icon.style.alignItems = "center"
+          icon.style.height = "24px"
+          
+          // Aggressiv justering av ikonen
+          const svgIcon = icon.querySelector("svg") as SVGElement
+          if (svgIcon) {
+            svgIcon.style.width = "16px"
+            svgIcon.style.height = "16px"
+            svgIcon.style.minWidth = "16px"
+            svgIcon.style.marginRight = "6px"
+            svgIcon.style.position = "relative"
+            svgIcon.style.transform = "translateY(1px)" // Tvinga ikonerna nedåt lite för att matcha textens baseline
+          }
+          
+          // Se till att text-element är vertikalt centrerade
+          const textSpan = icon.querySelector("span")
+          if (textSpan) {
+            textSpan.style.lineHeight = "normal"
+            textSpan.style.display = "inline-block"
+            textSpan.style.verticalAlign = "middle"
+          }
+        })
       }
-
+      
+      // Fixa beskrivningstexter
+      const descriptionTexts = clonedCV.querySelectorAll('[class*="description"]');
+      if (descriptionTexts.length > 0) {
+        descriptionTexts.forEach(desc => {
+          const descElement = desc as HTMLElement;
+          descElement.style.whiteSpace = "pre-wrap";
+          descElement.style.wordBreak = "break-word";
+          descElement.style.overflow = "visible";
+          descElement.style.display = "block";
+          descElement.style.maxHeight = "none";
+        });
+      }
+      
+      // Fixa kalender-ikoner vid datumen med samma aggressiva justering
+      const dateRanges = clonedCV.querySelectorAll(".cv-daterange") as NodeListOf<HTMLElement>
+      if (dateRanges.length > 0) {
+        dateRanges.forEach(dateRange => {
+          // Fixa container-styling
+          dateRange.style.display = "inline-flex"
+          dateRange.style.alignItems = "center"
+          dateRange.style.height = "20px"
+          
+          // Aggressiv justering av kalender-ikonen
+          const calendarIcon = dateRange.querySelector("svg") as SVGElement
+          if (calendarIcon) {
+            calendarIcon.style.width = "12px"
+            calendarIcon.style.height = "12px"
+            calendarIcon.style.minWidth = "12px"
+            calendarIcon.style.marginRight = "4px"
+            calendarIcon.style.position = "relative"
+            calendarIcon.style.transform = "translateY(1px)" // Tvinga ikonerna nedåt lite för att matcha textens baseline
+          }
+          
+          // Justera texten bredvid ikonen
+          const textSpan = dateRange.querySelector("span")
+          if (textSpan) {
+            textSpan.style.lineHeight = "normal"
+            textSpan.style.display = "inline-block"
+            textSpan.style.verticalAlign = "middle"
+          }
+        })
+      }
+      
+      // Fixa namnstyling
+      const nameElement = clonedCV.querySelector(".cv-name") as HTMLElement
+      if (nameElement) {
+        nameElement.style.whiteSpace = "nowrap"
+        nameElement.style.display = "block"
+      }
+      
+      // Fixa layout för huvudsektioner
+      const headerElement = clonedCV.querySelector(".cv-header-content") as HTMLElement
+      if (headerElement) {
+        headerElement.style.display = "flex"
+        headerElement.style.flexDirection = "row"
+        headerElement.style.alignItems = "center"
+        headerElement.style.gap = "16px"
+      }
+      
+      // Skapa en canvas från klon-elementet
+      const canvas = await html2canvas(clonedCV, {
+        scale: 2, // Hög upplösning för att undvika suddighet
+        useCORS: true, // Tillåt bilder från andra domäner
+        logging: true, // Aktivera loggning för felsökning
+        backgroundColor: "white",
+        width: 794, // A4 bredd i pixlar (210mm)
+        height: clonedCV.offsetHeight,
+        windowWidth: 794,
+        windowHeight: clonedCV.offsetHeight,
+        ignoreElements: (element) => {
+          // Ignorera element som inte bör vara med i PDF:en
+          return element.classList.contains('color-editor') || 
+                 element.classList.contains('color-editor-button');
+        },
+        onclone: (clonedDoc) => {
+          // Säkerställ att alla sektioner och innehåll är synliga
+          const sections = clonedDoc.querySelectorAll('.cv-preview-container > div > div');
+          sections.forEach((section: any) => {
+            if (section.style) {
+              section.style.display = 'block';
+              section.style.visibility = 'visible';
+              section.style.overflow = 'visible';
+            }
+          });
+          console.log("Kloning skedde", clonedDoc);
+        }
+      })
+      
+      // Ta bort klonen från DOM
+      document.body.removeChild(clonedCV)
+      
       // Skapa en kopia av canvas för att inte påverka originalet
       const canvasCopy = document.createElement('canvas');
       canvasCopy.width = canvas.width;
@@ -141,28 +289,37 @@ export function PDFExporter() {
         format: "a4",
       })
       
-      // Beräkna proportioner för att anpassa canvas till A4-storlek
-      const imgWidth = 210
-      const pageHeight = 297
-      const imgHeight = (canvasCopy.height * imgWidth) / canvasCopy.width
+      // Standardbredd för A4 
+      const pageWidth = 210;
+      const pageHeight = 297;
       
-      // Få bilddata från canvas med vattenstämpel om nödvändigt
-      const imgData = canvasCopy.toDataURL("image/png")
+      // Kontrollera om canvas-innehållet faktiskt har data
+      console.log("Canvas dimensions:", canvas.width, "x", canvas.height);
+      
+      // Beräkna bildbredd och höjd för att passa på A4
+      const imgWidth = pageWidth;
+      const imgHeight = (canvasCopy.height * imgWidth) / canvasCopy.width;
+      
+      console.log("Image dimensions for PDF:", imgWidth, "x", imgHeight);
+      
+      // Få bilddata från canvas
+      const imgData = canvasCopy.toDataURL("image/png");
       
       // Om innehållet är högre än en A4-sida, dela upp det på flera sidor
-      let heightLeft = imgHeight
-      let position = 0
+      let heightLeft = imgHeight;
+      let position = 0;
       
       // Lägg till första sidan
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
       
       // Lägg till ytterligare sidor vid behov
       while (heightLeft > 0) {
-        position = heightLeft - imgHeight
-        pdf.addPage()
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
+        position = -pageHeight; // Justera för att säkerställa korrekt position
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        position -= pageHeight; // Flytta ned för varje ny sida
       }
       
       // Spara PDF med personens namn
@@ -189,13 +346,14 @@ export function PDFExporter() {
           description: "Din PDF har exporterats framgångsrikt",
         })
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Fel vid export:", error)
       toast({
         title: "Fel vid export",
-        description: `Det gick inte att exportera PDF:en: ${error.message || "Okänt fel"}`,
+        description: `Det gick inte att exportera PDF:en: ${(error as Error).message || "Okänt fel"}`,
         variant: "destructive",
       })
+      throw error;
     } finally {
       setIsExporting(false)
     }
@@ -203,35 +361,38 @@ export function PDFExporter() {
 
   return (
     <>
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Button 
-          onClick={handleExportClick} 
-          disabled={isExporting || !currentCV} 
-          className="w-full h-10 sm:h-auto"
-          size="sm"
-        >
-          {isExporting ? (
-            <>
-              <LoadingSpinner className="mr-2 h-4 w-4" />
-              {window.innerWidth > 400 ? "Exporterar..." : ""}
-            </>
-          ) : (
-            <>
-              <Download className="mr-2 h-4 w-4" />
-              Exportera PDF
-            </>
-          )}
-        </Button>
-      </motion.div>
-      
-      {/* Visa bara PaywallModal för användare som inte kan exportera utan vattenstämpel */}
-      {!canExportWithoutWatermark() && (
-        <PaywallModal 
-          isOpen={showPaywall}
-          onClose={() => setShowPaywall(false)}
-          onContinueAnyway={() => handleExport(true)}
-        />
-      )}
+      <Tabs 
+        defaultValue="original" 
+        value={exportMethod} 
+        onValueChange={setExportMethod} 
+        className="w-full mb-2"
+      >
+        <TabsList className="grid grid-cols-2 mb-4">
+          <TabsTrigger value="original">HTML Export</TabsTrigger>
+          <TabsTrigger value="react-pdf">React PDF Export</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="original">
+          <PDFExportButton
+            onClick={handleExportClick}
+            isExporting={isExporting}
+            label="Exportera PDF (HTML)"
+          />
+        </TabsContent>
+        
+        <TabsContent value="react-pdf">
+          <ReactPDFExporter />
+        </TabsContent>
+      </Tabs>
+
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onContinueAnyway={() => {
+          setShowPaywall(false)
+          handleExport(true) // Exportera med vattenstämpel
+        }}
+      />
     </>
   )
 }

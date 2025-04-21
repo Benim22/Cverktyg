@@ -164,69 +164,77 @@ export function SkillsForm({ sectionId, items = [], isAdding = false }: SkillsFo
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId={`skills-${sectionId}`}>
+      <Droppable 
+        droppableId={`skills-${sectionId}`}
+        ignoreContainerClipping={false}
+        isDropDisabled={false}
+        isCombineEnabled={false}
+      >
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
             {items.map((item: Skill, index) => (
               <Draggable key={item.id} draggableId={item.id} index={index}>
-                {(provided) => (
-                  <motion.div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
+                {(providedDraggable) => (
+                  <div
+                    ref={providedDraggable.innerRef}
+                    {...providedDraggable.draggableProps}
                     className="relative"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
-                    <Card>
-                      <div
-                        {...provided.dragHandleProps}
-                        className="absolute left-2 top-3 cursor-grab text-muted-foreground"
-                      >
-                        <Grip className="h-5 w-5" />
-                      </div>
-                      <CardHeader className="pl-10">
-                        <CardTitle className="flex items-center justify-between">
-                          <span>{item.name}</span>
-                          <div className="flex text-primary">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <span key={i} className={i < item.level ? "opacity-100" : "opacity-30"}>
-                                ★
-                              </span>
-                            ))}
-                          </div>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardFooter className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Redigera
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Ta bort
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Ta bort färdighet</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Är du säker på att du vill ta bort denna färdighet? Denna åtgärd kan inte ångras.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => removeItem(sectionId, item.id)}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <Card>
+                        <div
+                          {...providedDraggable.dragHandleProps}
+                          className="absolute left-2 top-3 cursor-grab text-muted-foreground"
+                        >
+                          <Grip className="h-5 w-5" />
+                        </div>
+                        <CardHeader className="pl-10">
+                          <CardTitle className="flex items-center justify-between">
+                            <span>{item.name}</span>
+                            <div className="flex text-primary">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <span key={i} className={i < item.level ? "opacity-100" : "opacity-30"}>
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardFooter className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Redigera
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm">
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Ta bort
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </CardFooter>
-                    </Card>
-                  </motion.div>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Ta bort färdighet</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Är du säker på att du vill ta bort denna färdighet? Denna åtgärd kan inte ångras.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => removeItem(sectionId, item.id)}>
+                                  Ta bort
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </CardFooter>
+                      </Card>
+                    </motion.div>
+                  </div>
                 )}
               </Draggable>
             ))}

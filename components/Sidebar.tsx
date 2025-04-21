@@ -18,6 +18,7 @@ import {
   User,
   Wrench,
   Loader2,
+  X,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -43,12 +44,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
+import { useMediaQuery } from "@/hooks/use-media-query"
 
-export function Sidebar() {
+interface SidebarProps {
+  className?: string;
+  onClose?: () => void;
+}
+
+export function Sidebar({ className, onClose }: SidebarProps) {
   const { currentCV, saveCV, addSection } = useCV()
   const pathname = usePathname()
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
+  const isMobile = !useMediaQuery("(min-width: 1024px)")
   
   // State för "Lägg till sektion" dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -69,6 +78,9 @@ export function Sidebar() {
   
   const handleExportPDF = () => {
     router.push(`/preview/${currentCV?.id}`)
+    if (isMobile && onClose) {
+      onClose()
+    }
   }
   
   const handleAddSection = () => {
@@ -92,13 +104,19 @@ export function Sidebar() {
       initial={{ x: -50, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="flex h-full w-60 flex-col border-r bg-background"
+      className={cn("flex h-full flex-col border-r bg-background", className)}
     >
-      <div className="flex h-14 items-center border-b px-4">
+      <div className="flex h-14 items-center border-b px-4 justify-between">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <FileText className="h-5 w-5 text-primary" />
           <span>CV Editor</span>
         </Link>
+        {isMobile && onClose && (
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Stäng</span>
+          </Button>
+        )}
       </div>
       <ScrollArea className="flex-1">
         <div className="px-3 py-2">
@@ -109,6 +127,7 @@ export function Sidebar() {
                 variant={pathname.includes("/editor") && !pathname.includes("/preview") ? "secondary" : "ghost"}
                 className="w-full justify-start"
                 asChild
+                onClick={isMobile && onClose ? onClose : undefined}
               >
                 <Link href={`/editor/${currentCV?.id}`}>
                   <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -121,6 +140,7 @@ export function Sidebar() {
                 variant={pathname.includes("/preview") ? "secondary" : "ghost"}
                 className="w-full justify-start"
                 asChild
+                onClick={isMobile && onClose ? onClose : undefined}
               >
                 <Link href={`/preview/${currentCV?.id}`}>
                   <FileText className="mr-2 h-4 w-4" />
@@ -132,7 +152,10 @@ export function Sidebar() {
               <Button 
                 variant="ghost" 
                 className="w-full justify-start" 
-                onClick={handleSave}
+                onClick={() => {
+                  handleSave();
+                  if (isMobile && onClose) onClose();
+                }}
                 disabled={isSaving}
               >
                 {isSaving ? (
@@ -155,7 +178,12 @@ export function Sidebar() {
               </Button>
             </motion.div>
             <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-              <Button variant="ghost" className="w-full justify-start" asChild>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start" 
+                asChild
+                onClick={isMobile && onClose ? onClose : undefined}
+              >
                 <Link href="/editor/settings/cv">
                   <Settings className="mr-2 h-4 w-4" />
                   Inställningar
@@ -169,7 +197,11 @@ export function Sidebar() {
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">Sektioner</h2>
           <div className="space-y-1">
             <motion.div whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-              <Button variant="ghost" className="w-full justify-start">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start"
+                onClick={isMobile && onClose ? onClose : undefined}
+              >
                 <User className="mr-2 h-4 w-4" />
                 Personuppgifter
                 <ChevronRight className="ml-auto h-4 w-4" />
@@ -178,7 +210,11 @@ export function Sidebar() {
 
             {sections.map((section) => (
               <motion.div key={section.id} whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                <Button variant="ghost" className="w-full justify-start">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start"
+                  onClick={isMobile && onClose ? onClose : undefined}
+                >
                   {section.type === "education" && <GraduationCap className="mr-2 h-4 w-4" />}
                   {section.type === "experience" && <Briefcase className="mr-2 h-4 w-4" />}
                   {section.type === "projects" && <BookOpen className="mr-2 h-4 w-4" />}
@@ -238,7 +274,11 @@ export function Sidebar() {
         </div>
       </ScrollArea>
       <div className="mt-auto border-t p-4">
-        <AnimatedButton className="w-full" asChild>
+        <AnimatedButton 
+          className="w-full" 
+          asChild
+          onClick={isMobile && onClose ? onClose : undefined}
+        >
           <Link href="/dashboard">Tillbaka till Dashboard</Link>
         </AnimatedButton>
       </div>

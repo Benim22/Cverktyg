@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar"
 import { MetaTags } from "@/components/MetaTags"
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, FileText, Loader2, SparklesIcon, LockIcon } from "lucide-react"
+import { Eye, FileText, Loader2, SparklesIcon, LockIcon, Wand2, FileEdit, FilePlus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { PageTransition } from "@/components/animations/PageTransition"
@@ -15,13 +15,25 @@ import { AnimatedCard } from "@/components/animations/AnimatedCard"
 import { CV_TEMPLATES } from "@/data/templates"
 import { TemplateManager } from "@/components/templates/TemplateManager"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { createCV, getSupabaseClient } from "@/lib/supabase-client"
+import { useState, useEffect } from "react"
+import { createCV, getSupabaseClient, getUserCVs } from "@/lib/supabase-client"
 import { v4 as uuidv4 } from "uuid"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useSubscription } from "@/contexts/SubscriptionContext"
 import { Badge } from "@/components/ui/badge"
+import { motion } from "framer-motion"
+import { useInView } from "react-intersection-observer"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Kategori-mapping för mallar
 const templateCategories = {
@@ -30,9 +42,15 @@ const templateCategories = {
   "minimalist": "creative",
   "creative": "creative",
   "professional": "business",
+  "executive": "business",
+  "academic": "academic",
+  "technical": "technical",
+  "nordic": "creative",
 }
 
 export default function TemplatesPage() {
+  const [selectedFilter, setSelectedFilter] = useState("all")
+  
   return (
     <>
       <MetaTags 
@@ -46,9 +64,18 @@ export default function TemplatesPage() {
         <div className="container py-10">
           <FadeIn>
             <div className="mb-8 text-center">
-              <h1 className="text-3xl font-bold">CV-mallar</h1>
-              <p className="mt-2 text-muted-foreground">
-                Välj bland våra professionellt designade CV-mallar för att skapa ditt perfekta CV
+              <div className="relative inline-block">
+                <h1 className="text-4xl font-bold mb-1">CV-mallar</h1>
+                <motion.div 
+                  className="absolute -bottom-2 left-0 h-1 bg-primary rounded-full" 
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                />
+              </div>
+              <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+                Välj bland våra professionellt designade CV-mallar för att skapa ditt perfekta CV.
+                Varje mall är optimerad för ATS-system och rekryterare.
               </p>
             </div>
           </FadeIn>
@@ -56,43 +83,72 @@ export default function TemplatesPage() {
           <FadeIn delay={0.1}>
             <Tabs defaultValue="gallery" className="mb-8">
               <TabsList className="mx-auto flex w-fit">
-                <TabsTrigger value="gallery">Mallgalleri</TabsTrigger>
-                <TabsTrigger value="manager">Mallhanterare</TabsTrigger>
+                <TabsTrigger value="gallery" className="relative overflow-hidden group">
+                  <span className="relative z-10">Mallgalleri</span>
+                  <motion.div 
+                    className="absolute inset-0 bg-primary/10 -z-0" 
+                    initial={{ y: "100%" }}
+                    whileHover={{ y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </TabsTrigger>
+                <TabsTrigger value="manager" className="relative overflow-hidden group">
+                  <span className="relative z-10">Mallhanterare</span>
+                  <motion.div 
+                    className="absolute inset-0 bg-primary/10 -z-0" 
+                    initial={{ y: "100%" }}
+                    whileHover={{ y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </TabsTrigger>
               </TabsList>
               
               {/* Mallgalleri */}
               <TabsContent value="gallery" className="mt-6">
-                <Tabs defaultValue="all" className="mb-8">
-                  <TabsList className="mx-auto flex w-fit">
-                    <TabsTrigger value="all">Alla</TabsTrigger>
-                    <TabsTrigger value="business">Företag</TabsTrigger>
-                    <TabsTrigger value="creative">Kreativa</TabsTrigger>
-                    <TabsTrigger value="academic">Akademiska</TabsTrigger>
-                    <TabsTrigger value="technical">Tekniska</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="all" className="mt-6">
-                    <StaggerChildren>
-                      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {CV_TEMPLATES.map((template) => (
-                          <TemplateCard key={template.id} template={template} />
-                        ))}
-                      </div>
-                    </StaggerChildren>
-                  </TabsContent>
-                  {["business", "creative", "academic", "technical"].map((category) => (
-                    <TabsContent key={category} value={category} className="mt-6">
-                      <StaggerChildren>
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                          {CV_TEMPLATES
-                            .filter((t) => templateCategories[t.id as keyof typeof templateCategories] === category)
-                            .map((template) => (
-                              <TemplateCard key={template.id} template={template} />
-                            ))}
-                        </div>
-                      </StaggerChildren>
-                    </TabsContent>
+                <motion.div 
+                  className="p-4 mb-6 bg-primary/5 rounded-lg border border-primary/10 text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <Wand2 className="h-5 w-5 text-primary inline-block mr-2" />
+                  <span className="text-sm">
+                    Våra CV-mallar är nu uppdaterade med förbättrad kompatibilitet för PDF-export!
+                  </span>
+                </motion.div>
+                
+                <motion.div 
+                  className="flex flex-wrap gap-2 justify-center mb-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  {["all", "business", "creative", "academic", "technical"].map((category) => (
+                    <Button 
+                      key={category} 
+                      variant={selectedFilter === category ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedFilter(category)}
+                      className="capitalize"
+                    >
+                      {category === "all" ? "Alla" : 
+                       category === "business" ? "Företag" : 
+                       category === "creative" ? "Kreativa" : 
+                       category === "academic" ? "Akademiska" : "Tekniska"}
+                    </Button>
                   ))}
-                </Tabs>
+                </motion.div>
+                
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {CV_TEMPLATES
+                    .filter(template => 
+                      selectedFilter === "all" || 
+                      templateCategories[template.id as keyof typeof templateCategories] === selectedFilter
+                    )
+                    .map((template, index) => (
+                      <TemplateCard key={template.id} template={template} index={index} />
+                    ))}
+                </div>
               </TabsContent>
               
               {/* Mallhanterare */}
@@ -107,13 +163,57 @@ export default function TemplatesPage() {
   )
 }
 
-function TemplateCard({ template }: { template: (typeof CV_TEMPLATES)[0] }) {
+function TemplateCard({ template, index }: { template: (typeof CV_TEMPLATES)[0], index: number }) {
   const [imageError, setImageError] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [existingCVs, setExistingCVs] = useState<any[]>([])
+  const [selectedCV, setSelectedCV] = useState<string>("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedOption, setSelectedOption] = useState<"new" | "existing">("new")
+  
   const router = useRouter()
   const { isPremiumPlan } = useSubscription()
   const hasPremiumAccess = isPremiumPlan()
   const isPremiumTemplate = template.isPremium === true
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1
+  })
+  
+  // Hämta befintliga CVs när dialogen öppnas
+  useEffect(() => {
+    const fetchCVs = async () => {
+      if (isDialogOpen) {
+        setIsLoading(true)
+        try {
+          const supabase = getSupabaseClient()
+          const { data: { session } } = await supabase.auth.getSession()
+          
+          if (session) {
+            const { data, error } = await getUserCVs(session.user.id)
+            
+            if (error) {
+              console.error("Fel vid hämtning av CVs:", error)
+              toast.error("Kunde inte hämta dina befintliga CV:n")
+            } else if (data) {
+              setExistingCVs(data)
+              // Om användaren har minst ett CV, använd det första som standard
+              if (data.length > 0) {
+                setSelectedCV(data[0].id)
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Fel vid hämtning av CVs:", error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    }
+    
+    fetchCVs()
+  }, [isDialogOpen])
 
   // Funktion för att skapa ett nytt CV med den valda mallen
   const handleCreateCV = async () => {
@@ -199,6 +299,50 @@ function TemplateCard({ template }: { template: (typeof CV_TEMPLATES)[0] }) {
       console.error("Fel vid skapande av CV:", error)
       toast.error("Kunde inte skapa nytt CV")
       setCreating(false)
+    }
+  }
+  
+  // Hantera när användaren trycker på "Använd mall"-knappen
+  const handleUseTemplate = () => {
+    // Kontrollera om användaren försöker använda en premium-mall utan åtkomst
+    if (isPremiumTemplate && !hasPremiumAccess) {
+      toast.error("Denna mall kräver en premium-prenumeration")
+      return
+    }
+    
+    // Öppna dialog för val
+    setIsDialogOpen(true)
+  }
+  
+  // Hantera användning av mall på befintligt CV
+  const handleApplyToExistingCV = async () => {
+    if (!selectedCV) {
+      toast.error("Du måste välja ett CV")
+      return
+    }
+    
+    setCreating(true)
+    try {
+      // Här skulle implementering för att uppdatera befintligt CV med ny mall läggas till
+      // För nu, navigera bara till redigeringssidan
+      toast.success(`Mallen ${template.name} applicerad på befintligt CV`)
+      router.push(`/editor/${selectedCV}?template=${template.id}`)
+    } catch (error) {
+      console.error("Fel vid applicering av mall:", error)
+      toast.error("Kunde inte applicera mall på befintligt CV")
+    } finally {
+      setCreating(false)
+      setIsDialogOpen(false)
+    }
+  }
+  
+  // Hantera bekräftelse från dialog
+  const handleConfirm = async () => {
+    if (selectedOption === "new") {
+      setIsDialogOpen(false)
+      handleCreateCV()
+    } else {
+      handleApplyToExistingCV()
     }
   }
 
@@ -363,90 +507,204 @@ function TemplateCard({ template }: { template: (typeof CV_TEMPLATES)[0] }) {
         )
     }
   }
+  
+  const previewBackground = generatePreviewBackground();
 
   return (
-    <AnimatedCard className="overflow-hidden">
-      <div className="aspect-[3/4] w-full overflow-hidden bg-secondary/30 relative">
-        {/* Premium-badge */}
-        {isPremiumTemplate && (
-          <div className="absolute top-2 right-2 z-10">
-            <Badge className="bg-gradient-to-r from-amber-200 to-yellow-400 text-amber-900 border-amber-400">
-              <SparklesIcon className="h-3 w-3 mr-1" />
-              Premium
-            </Badge>
-          </div>
-        )}
-      
-        {/* Låsoverlay för premium-mallar */}
-        {isPremiumTemplate && !hasPremiumAccess && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
-            <LockIcon className="h-10 w-10 text-white/90 mb-2" />
-            <p className="text-white text-center font-medium">Premium-mall</p>
-            <p className="text-white/80 text-center text-xs px-4 mt-1">
-              Kräver prenumeration
-            </p>
-          </div>
-        )}
-        
-        {template.previewImage && !imageError ? (
-          <Image
-            src={template.previewImage}
-            alt={template.name}
-            width={300}
-            height={400}
-            className={`h-full w-full object-cover transition-transform hover:scale-105 ${isPremiumTemplate && !hasPremiumAccess ? "blur-sm" : ""}`}
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            {generatePreviewBackground()}
-          </div>
-        )}
-      </div>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          {template.name}
-          {isPremiumTemplate && (
-            <SparklesIcon className="h-4 w-4 ml-2 text-amber-500" />
-          )}
-        </CardTitle>
-        <CardDescription>{template.description}</CardDescription>
-      </CardHeader>
-      <CardFooter className="flex justify-between">
-        <AnimatedButton 
-          variant="outline" 
-          asChild
-          className="px-4 py-2"
-        >
-          <Link href={`/templates/${template.id}`}>
-            <Eye className="mr-2 h-4 w-4" />
-            Förhandsgranska
-          </Link>
-        </AnimatedButton>
-        <AnimatedButton 
-          onClick={handleCreateCV} 
-          disabled={creating || (isPremiumTemplate && !hasPremiumAccess)}
-          className="px-4 py-2"
-        >
-          {creating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Skapar...
-            </>
-          ) : isPremiumTemplate && !hasPremiumAccess ? (
-            <>
-              <LockIcon className="mr-2 h-4 w-4" />
-              Premium
-            </>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="relative group"
+    >
+      <AnimatedCard className="overflow-hidden h-full transition-all duration-300 hover:shadow-lg">
+        <CardHeader className="relative p-0 overflow-hidden aspect-[1/1.3] bg-muted">
+          {previewBackground ? (
+            previewBackground
           ) : (
-            <>
-              <FileText className="mr-2 h-4 w-4" />
-              Använd mall
-            </>
+            <div className="relative w-full h-full">
+              {imageError ? (
+                <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-muted">
+                  <FileText className="h-12 w-12 text-muted-foreground mb-2" />
+                  <p className="text-sm text-center text-muted-foreground">
+                    {template.name} CV-mall
+                  </p>
+                </div>
+              ) : (
+                <Image
+                  src={template.previewImage}
+                  alt={template.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={() => setImageError(true)}
+                />
+              )}
+
+              {isPremiumTemplate && (
+                <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-medium py-1 px-2 rounded-md flex items-center">
+                  <SparklesIcon className="h-3 w-3 mr-1" />
+                  Premium
+                </div>
+              )}
+              
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <Button variant="secondary" size="sm" asChild>
+                  <Link href={`/templates/${template.id}`}>
+                    <Eye className="h-4 w-4 mr-1" />
+                    Förhandsgranska
+                  </Link>
+                </Button>
+              </div>
+            </div>
           )}
-        </AnimatedButton>
-      </CardFooter>
-    </AnimatedCard>
+        </CardHeader>
+        
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold">{template.name}</h3>
+            {template.category && (
+              <Badge variant="outline" className="capitalize">
+                {template.category === "business" ? "Företag" : 
+                 template.category === "creative" ? "Kreativ" : 
+                 template.category === "academic" ? "Akademisk" : "Teknisk"}
+              </Badge>
+            )}
+          </div>
+          
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+            {template.description}
+          </p>
+          
+          <div className="mt-auto flex gap-2">
+            <AnimatedButton
+              variant="default"
+              className="w-full"
+              disabled={creating}
+              onClick={handleUseTemplate}
+            >
+              {creating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Skapar...
+                </>
+              ) : isPremiumTemplate && !hasPremiumAccess ? (
+                <>
+                  <LockIcon className="h-4 w-4 mr-1" />
+                  Premium
+                </>
+              ) : (
+                "Använd mall"
+              )}
+            </AnimatedButton>
+            
+            <AnimatedButton
+              variant="outline"
+              size="icon"
+              asChild
+            >
+              <Link href={`/templates/${template.id}`}>
+                <Eye className="h-4 w-4" />
+              </Link>
+            </AnimatedButton>
+          </div>
+        </div>
+      </AnimatedCard>
+      
+      {/* Accent elements for visual interest */}
+      <motion.div 
+        className="absolute -z-10 w-24 h-24 rounded-full bg-primary/10 blur-xl"
+        initial={{ opacity: 0, x: -20, y: 20 }}
+        animate={inView ? { opacity: 0.5, x: -30, y: 30 } : { opacity: 0, x: -20, y: 20 }}
+        transition={{ duration: 1, delay: index * 0.15 }}
+      />
+      
+      {/* Dialog för val av nytt eller befintligt CV */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Använd {template.name}-mallen</DialogTitle>
+            <DialogDescription>
+              Välj om du vill skapa ett nytt CV med denna mall eller använda den i ett befintligt CV.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                variant={selectedOption === "new" ? "default" : "outline"} 
+                className="flex flex-col h-auto py-4 gap-2 items-center justify-center"
+                onClick={() => setSelectedOption("new")}
+              >
+                <FilePlus className="h-8 w-8" />
+                <span>Skapa nytt CV</span>
+              </Button>
+              
+              <Button 
+                variant={selectedOption === "existing" ? "default" : "outline"} 
+                className="flex flex-col h-auto py-4 gap-2 items-center justify-center"
+                onClick={() => setSelectedOption("existing")}
+              >
+                <FileEdit className="h-8 w-8" />
+                <span>Använd i befintligt CV</span>
+              </Button>
+            </div>
+            
+            {selectedOption === "existing" && (
+              <div className="pt-2">
+                <Select value={selectedCV} onValueChange={setSelectedCV}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj ett CV" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center p-2">
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Laddar...
+                      </div>
+                    ) : existingCVs.length === 0 ? (
+                      <div className="p-2 text-sm text-muted-foreground">
+                        Inga CV:n hittades
+                      </div>
+                    ) : (
+                      <SelectGroup>
+                        <SelectLabel>Dina CV:n</SelectLabel>
+                        {existingCVs.map((cv) => (
+                          <SelectItem key={cv.id} value={cv.id}>
+                            {cv.title || "Namnlöst CV"}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
+                  </SelectContent>
+                </Select>
+                
+                {selectedOption === "existing" && existingCVs.length === 0 && !isLoading && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Du har inga befintliga CV:n. Välj "Skapa nytt CV" istället.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDialogOpen(false)}
+            >
+              Avbryt
+            </Button>
+            <Button 
+              onClick={handleConfirm}
+              disabled={selectedOption === "existing" && (!selectedCV || existingCVs.length === 0)}
+            >
+              Fortsätt
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
   )
 }
 

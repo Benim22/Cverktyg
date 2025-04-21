@@ -18,188 +18,118 @@ export const CV_TEMPLATES: CVTemplate[] = [
     isPremium: false
   },
   {
-    id: "modern",
-    name: "Modern",
-    description: "En stilren och modern design med fokus på tydlig struktur",
-    previewImage: "/images/templates/modern-preview.png",
-    layout: "modern",
+    id: "elegant",
+    name: "Elegant",
+    description: "En sofistikerad och stilren layout med eleganta detaljer",
+    previewImage: "/images/templates/elegant-preview.png",
+    layout: "elegant",
     colorScheme: {
-      primaryColor: "#0891b2", // Cyan
-      secondaryColor: "#06b6d4", // Ljusare cyan
-      headingColor: "#1e293b", // Mörkgrå
-      subHeadingColor: "#334155", // Mörkgrå
-      textColor: "#475569", // Grå
-      backgroundColor: "#f8fafc", // Ljusgrå
-      accentColor: "#f43f5e", // Rosa
-    },
-    fontSettings: {
-      headingFont: "Montserrat, sans-serif",
-      bodyFont: "Roboto, sans-serif",
-      fontSize: "medium"
-    },
-    category: "business",
-    isPremium: false
-  },
-  {
-    id: "minimalist",
-    name: "Minimalistisk",
-    description: "En avskalad design med luftig layout och bara det väsentliga",
-    previewImage: "/images/templates/minimalist-preview.png",
-    layout: "minimalist",
-    colorScheme: {
-      primaryColor: "#18181b", // Nästan svart
-      secondaryColor: "#3f3f46", // Mörkgrå
-      headingColor: "#18181b", // Nästan svart
-      subHeadingColor: "#52525b", // Grå
-      textColor: "#71717a", // Mörkgrå
+      primaryColor: "#5E3B73", // Lila
+      secondaryColor: "#9A7FB8", // Ljuslila
+      headingColor: "#2D2D2D", // Mörkgrå
+      subHeadingColor: "#4A4A4A", // Grå
+      textColor: "#5A5A5A", // Textgrå
       backgroundColor: "#ffffff", // Vit
-      accentColor: "#a1a1aa", // Ljusgrå
-    },
-    fontSettings: {
-      headingFont: "DM Sans, sans-serif",
-      bodyFont: "DM Sans, sans-serif",
-      fontSize: "small"
-    },
-    category: "creative",
-    isPremium: false
-  },
-  {
-    id: "creative",
-    name: "Kreativ",
-    description: "En uttrycksfull design för kreativa branscher och personligheter",
-    previewImage: "/images/templates/creative-preview.png",
-    layout: "creative",
-    colorScheme: {
-      primaryColor: "#6d28d9", // Lila
-      secondaryColor: "#7c3aed", // Ljusare lila
-      headingColor: "#4c1d95", // Mörklila
-      subHeadingColor: "#6d28d9", // Lila
-      textColor: "#4b5563", // Grå
-      backgroundColor: "#f5f3ff", // Mycket ljus lila
-      accentColor: "#ec4899", // Rosa
-    },
-    fontSettings: {
-      headingFont: "Poppins, sans-serif",
-      bodyFont: "Nunito, sans-serif",
-      fontSize: "medium"
-    },
-    category: "creative",
-    isPremium: false
-  },
-  {
-    id: "professional",
-    name: "Professionell",
-    description: "En traditionell layout idealisk för företagsledare och erfarna yrkespersoner",
-    previewImage: "/images/templates/professional-preview.png",
-    layout: "professional",
-    colorScheme: {
-      primaryColor: "#1e3a8a", // Mörkblå
-      secondaryColor: "#1e40af", // Mörk kunglig blå
-      headingColor: "#111827", // Nästan svart
-      subHeadingColor: "#1f2937", // Mycket mörkgrå
-      textColor: "#374151", // Mörkgrå
-      backgroundColor: "#ffffff", // Vit
-      accentColor: "#b91c1c", // Mörkröd
-    },
-    fontSettings: {
-      headingFont: "Merriweather, serif",
-      bodyFont: "Source Sans Pro, sans-serif",
-      fontSize: "medium"
-    },
-    category: "business",
-    isPremium: false
-  },
-  // PREMIUM MALLAR
-  {
-    id: "executive",
-    name: "Executive",
-    description: "Premium-mall för ledande befattningar och höga chefspositioner",
-    previewImage: "/images/templates/executive-preview.png",
-    layout: "executive",
-    colorScheme: {
-      primaryColor: "#1e293b", // Mörkblå/grå
-      secondaryColor: "#334155", // Mörkgrå
-      headingColor: "#0f172a", // Nästan svart
-      subHeadingColor: "#1e293b", // Mörkblå/grå
-      textColor: "#334155", // Mörkgrå
-      backgroundColor: "#f8fafc", // Ljusgrå
-      accentColor: "#c2410c", // Mörkorange
+      accentColor: "#D4AF37" // Guld
     },
     fontSettings: {
       headingFont: "Playfair Display, serif",
-      bodyFont: "Lato, sans-serif",
+      bodyFont: "Inter, sans-serif",
       fontSize: "medium"
     },
-    category: "business", 
-    isPremium: true
+    category: "creative",
+    isPremium: false
   },
   {
-    id: "academic",
-    name: "Akademisk",
-    description: "Specialanpassad för akademiker, forskare och utbildningsprofessioner",
-    previewImage: "/images/templates/academic-preview.png",
-    layout: "academic",
+    id: "tech",
+    name: "Tech",
+    description: "En modern layout med tekniskt utseende perfekt för IT och ingenjörsroller",
+    previewImage: "/images/templates/tech-preview.png",
+    layout: "tech",
     colorScheme: {
-      primaryColor: "#5b21b6", // Mörklila
-      secondaryColor: "#7c3aed", // Lila
-      headingColor: "#1e293b", // Mörkgrå
-      subHeadingColor: "#334155", // Mörkgrå
-      textColor: "#475569", // Grå
-      backgroundColor: "#f8fafc", // Ljusgrå
-      accentColor: "#9333ea", // Ljuslila
-    },
-    fontSettings: {
-      headingFont: "Merriweather, serif",
-      bodyFont: "Merriweather Sans, sans-serif",
-      fontSize: "medium"
-    },
-    category: "academic",
-    isPremium: true
-  },
-  {
-    id: "technical",
-    name: "Teknisk",
-    description: "Optimerad för ingenjörer, utvecklare och andra tekniska roller",
-    previewImage: "/images/templates/technical-preview.png",
-    layout: "technical",
-    colorScheme: {
-      primaryColor: "#0f172a", // Mörkblå
-      secondaryColor: "#1e293b", // Mörkgrå
-      headingColor: "#0f172a", // Mörkblå
-      subHeadingColor: "#1e293b", // Mörkgrå
-      textColor: "#475569", // Grå
-      backgroundColor: "#f8fafc", // Ljusgrå
-      accentColor: "#0ea5e9", // Ljusblå
+      primaryColor: "#0F172A", // Mörkblå
+      secondaryColor: "#38BDF8", // Ljusblå
+      headingColor: "#1E293B", // Mörkgrå
+      subHeadingColor: "#334155", // Grå
+      textColor: "#64748B", // Textgrå
+      backgroundColor: "#F8FAFC", // Ljusgrå
+      accentColor: "#22C55E" // Grön
     },
     fontSettings: {
       headingFont: "JetBrains Mono, monospace",
       bodyFont: "Inter, sans-serif",
-      fontSize: "small"
+      fontSize: "medium"
     },
     category: "technical",
+    isPremium: false
+  },
+  {
+    id: "executive",
+    name: "Executive",
+    description: "Professionell design med elegant stil, perfekt för ledande befattningar",
+    previewImage: "/images/templates/executive-preview.png",
+    layout: "executive",
+    colorScheme: {
+      primaryColor: "#1A365D", // Mörkblå
+      secondaryColor: "#2A4365", // Mellanblå
+      headingColor: "#1A202C", // Nästan svart
+      subHeadingColor: "#2D3748", // Mörkgrå
+      textColor: "#4A5568", // Grå
+      backgroundColor: "#FFFFFF", // Vit
+      accentColor: "#C53030" // Röd
+    },
+    fontSettings: {
+      headingFont: "Georgia, serif",
+      bodyFont: "Helvetica, sans-serif",
+      fontSize: "medium"
+    },
+    category: "business",
     isPremium: true
   },
   {
     id: "nordic",
     name: "Nordic",
-    description: "Exklusiv nordisk design med elegant skandinavisk minimalism",
+    description: "Ren och minimalistisk design inspirerad av nordisk stil",
     previewImage: "/images/templates/nordic-preview.png",
-    layout: "minimalist",
+    layout: "nordic",
     colorScheme: {
-      primaryColor: "#2e3440", // Nordiskt mörkblå
-      secondaryColor: "#4c566a", // Nordiskt grå
-      headingColor: "#2e3440", // Nordiskt mörkblå
-      subHeadingColor: "#3b4252", // Mörkgrå
-      textColor: "#4c566a", // Nordiskt grå
-      backgroundColor: "#eceff4", // Ljusgrå bakgrund
-      accentColor: "#81a1c1", // Nordiskt ljusblå
+      primaryColor: "#2E3440", // Mörkgrå
+      secondaryColor: "#4C566A", // Mellangrå
+      headingColor: "#2E3440", // Mörkgrå
+      subHeadingColor: "#3B4252", // Grå
+      textColor: "#434C5E", // Textgrå
+      backgroundColor: "#ECEFF4", // Ljusgrå
+      accentColor: "#5E81AC" // Blå
     },
     fontSettings: {
-      headingFont: "Inter, sans-serif",
-      bodyFont: "Inter, sans-serif",
-      fontSize: "small"
+      headingFont: "system-ui, sans-serif",
+      bodyFont: "system-ui, sans-serif",
+      fontSize: "medium"
     },
     category: "creative",
     isPremium: true
+  },
+  {
+    id: "creative-pro",
+    name: "Creative Pro",
+    description: "Kreativ men professionell layout för kreativa branscher",
+    previewImage: "/images/templates/creative-pro-preview.png",
+    layout: "creative-pro",
+    colorScheme: {
+      primaryColor: "#6D28D9", // Lila
+      secondaryColor: "#A78BFA", // Ljuslila
+      headingColor: "#1F2937", // Mörkgrå
+      subHeadingColor: "#374151", // Grå
+      textColor: "#4B5563", // Textgrå
+      backgroundColor: "#F9FAFB", // Ljusgrå
+      accentColor: "#F59E0B" // Orange
+    },
+    fontSettings: {
+      headingFont: "Poppins, sans-serif",
+      bodyFont: "Poppins, sans-serif",
+      fontSize: "medium"
+    },
+    category: "creative",
+    isPremium: false
   }
 ] 

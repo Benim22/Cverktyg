@@ -4,8 +4,9 @@ import { useCV } from "@/contexts/CVContext"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PersonalInfoForm } from "@/components/PersonalInfoForm"
 import { SectionsList } from "@/components/SectionsList"
+import { CVPreview } from "@/components/CVPreview"
 import { useState, useEffect } from "react"
-import { Plus, Save, Loader2, Palette, User, Layers, Settings } from "lucide-react"
+import { Plus, Save, Loader2, Palette, User, Layers, Settings, SplitSquareVertical } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -29,17 +30,19 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { CVEditorMobile } from "@/components/CVEditorMobile"
 import { formatDistanceToNow } from "date-fns"
 import { sv } from "date-fns/locale"
+import { Button } from "@/components/ui/button"
 
 export function CVEditor() {
   const { currentCV, addSection, saveCV, loading, lastSaveTime, isAutoSaving } = useCV()
-  const [activeTab, setActiveTab] = useState("personal")
-  const [newSectionType, setNewSectionType] = useState<string>("education")
-  const [newSectionTitle, setNewSectionTitle] = useState<string>("")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const { toast } = useToast()
-  const router = useRouter()
   const isMobile = useIsMobile()
+  const [activeTab, setActiveTab] = useState<string>("personal")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [newSectionType, setNewSectionType] = useState<string>("education")
+  const [newSectionTitle, setNewSectionTitle] = useState<string>("")
+  const [showSplitView, setShowSplitView] = useState<boolean>(false)
 
   const handleAddSection = () => {
     if (!newSectionTitle) {
@@ -172,52 +175,78 @@ export function CVEditor() {
             <PersonalInfoForm />
           </TabsContent>
           <TabsContent value="sections" className="mt-4">
-            <div className="mb-4 flex justify-between">
+            <div className="mb-4 flex justify-between items-center">
               <h2 className="text-xl font-semibold">Sektioner</h2>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <AnimatedButton>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Lägg till sektion
-                  </AnimatedButton>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Lägg till ny sektion</DialogTitle>
-                    <DialogDescription>Välj typ av sektion och ange en titel.</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="section-type">Typ av sektion</Label>
-                      <Select value={newSectionType} onValueChange={setNewSectionType}>
-                        <SelectTrigger id="section-type">
-                          <SelectValue placeholder="Välj typ" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="education">Utbildning</SelectItem>
-                          <SelectItem value="experience">Erfarenhet</SelectItem>
-                          <SelectItem value="projects">Projekt</SelectItem>
-                          <SelectItem value="skills">Färdigheter</SelectItem>
-                        </SelectContent>
-                      </Select>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSplitView(!showSplitView)}
+                  className="flex items-center gap-2"
+                >
+                  <SplitSquareVertical className="h-4 w-4" />
+                  {showSplitView ? "Dölj förhandsgranskning" : "Visa förhandsgranskning"}
+                </Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <AnimatedButton>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Lägg till sektion
+                    </AnimatedButton>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Lägg till ny sektion</DialogTitle>
+                      <DialogDescription>Välj typ av sektion och ange en titel.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="section-type">Typ av sektion</Label>
+                        <Select value={newSectionType} onValueChange={setNewSectionType}>
+                          <SelectTrigger id="section-type">
+                            <SelectValue placeholder="Välj typ" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="education">Utbildning</SelectItem>
+                            <SelectItem value="experience">Erfarenhet</SelectItem>
+                            <SelectItem value="projects">Projekt</SelectItem>
+                            <SelectItem value="skills">Färdigheter</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="section-title">Titel</Label>
+                        <Input
+                          id="section-title"
+                          value={newSectionTitle}
+                          onChange={(e) => setNewSectionTitle(e.target.value)}
+                          placeholder="T.ex. Utbildning, Arbetslivserfarenhet"
+                        />
+                      </div>
                     </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="section-title">Titel</Label>
-                      <Input
-                        id="section-title"
-                        value={newSectionTitle}
-                        onChange={(e) => setNewSectionTitle(e.target.value)}
-                        placeholder="T.ex. Utbildning, Arbetslivserfarenhet"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <AnimatedButton onClick={handleAddSection}>Lägg till</AnimatedButton>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                    <DialogFooter>
+                      <AnimatedButton onClick={handleAddSection}>Lägg till</AnimatedButton>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
-            <SectionsList />
+            
+            {showSplitView ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <SectionsList />
+                </div>
+                <div className="border rounded-md p-4 shadow-sm">
+                  <h3 className="text-sm text-muted-foreground mb-2">Förhandsvisning</h3>
+                  <div className="transform scale-[0.55] origin-top-left -ml-[130px] -mt-[130px]">
+                    <CVPreview />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <SectionsList />
+            )}
           </TabsContent>
           <TabsContent value="templates" className="mt-4">
             <h2 className="text-xl font-semibold mb-4">Välj mall</h2>

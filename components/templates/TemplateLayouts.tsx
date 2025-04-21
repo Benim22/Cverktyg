@@ -28,7 +28,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
   } : {})
 
   return (
-    <div className="h-full p-4 sm:p-8">
+    <div className="h-full p-4 sm:p-8 overflow-visible" style={{ height: 'auto', minHeight: '100%' }}>
       {/* Header med personuppgifter */}
       <div className="border-b border-gray-200 pb-4 sm:pb-6">
         <div className="flex items-start gap-2 sm:gap-4 cv-header-content">
@@ -69,26 +69,26 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
           style={{ color: getColorValue("textColor") }}
         >
           {personalInfo.email && (
-            <div className="flex items-center gap-1">
-              <AtSign className="h-3 w-3 sm:h-4 sm:w-4" />
+            <div className="flex items-center gap-1 personal-info-icon">
+              <AtSign className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{personalInfo.email}</span>
             </div>
           )}
           {personalInfo.phone && (
-            <div className="flex items-center gap-1">
-              <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
+            <div className="flex items-center gap-1 personal-info-icon">
+              <Phone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{personalInfo.phone}</span>
             </div>
           )}
           {personalInfo.location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+            <div className="flex items-center gap-1 personal-info-icon">
+              <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{personalInfo.location}</span>
             </div>
           )}
           {personalInfo.website && (
-            <div className="flex items-center gap-1">
-              <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
+            <div className="flex items-center gap-1 personal-info-icon">
+              <Globe className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{personalInfo.website}</span>
             </div>
           )}
@@ -96,7 +96,7 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
 
         {personalInfo.summary && (
           <p 
-            className="mt-3 sm:mt-4 text-xs sm:text-sm"
+            className="mt-3 sm:mt-4 text-xs sm:text-sm whitespace-pre-wrap"
             style={{ color: getColorValue("textColor") }}
           >
             {personalInfo.summary}
@@ -105,180 +105,182 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
       </div>
 
       {/* Sektioner */}
-      {sections.map((section, index) => (
-        <div
-          key={section.id}
-          className="mt-4 sm:mt-6 border-b border-gray-200 pb-4 sm:pb-6 last:border-0"
-        >
-          <h2 
-            className="mb-3 sm:mb-4 text-lg sm:text-xl font-semibold cv-section-title"
-            style={{ color: getColorValue("headingColor") }}
+      <div className="cv-sections">
+        {sections.map((section, index) => (
+          <div
+            key={section.id}
+            className="mt-4 sm:mt-6 border-b border-gray-200 pb-4 sm:pb-6 last:border-0 cv-section"
           >
-            {section.title}
-          </h2>
+            <h2 
+              className="mb-3 sm:mb-4 text-lg sm:text-xl font-semibold cv-section-title"
+              style={{ color: getColorValue("headingColor") }}
+            >
+              {section.title}
+            </h2>
 
-          {/* Olika rendering beroende på sektionstyp */}
-          {section.type === "education" && (
-            <div className="space-y-3 sm:space-y-4">
-              {(section.items as Education[]).map((item) => (
-                <div key={item.id}>
-                  <div className="flex flex-col sm:flex-row sm:justify-between cv-education-header">
-                    <h3 
-                      className="font-medium text-sm sm:text-base"
-                      style={{ color: getColorValue("subHeadingColor") }}
-                    >
-                      {item.institution}
-                    </h3>
-                    <div 
-                      className="flex items-center gap-1 text-xs sm:text-sm cv-daterange"
-                      style={{ color: getColorValue("textColor") }}
-                    >
-                      <Calendar className="h-3 w-3" />
-                      <span>
-                        {item.startDate} - {item.endDate}
-                      </span>
-                    </div>
-                  </div>
-                  <p 
-                    className="text-xs sm:text-sm font-medium"
-                    style={{ color: getColorValue("subHeadingColor") }}
-                  >
-                    {item.degree} i {item.field}
-                  </p>
-                  {item.description && (
-                    <p 
-                      className="mt-1 text-xs sm:text-sm whitespace-pre-line"
-                      style={{ color: getColorValue("textColor") }}
-                    >
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {section.type === "experience" && (
-            <div className="space-y-3 sm:space-y-4">
-              {(section.items as Experience[]).map((item) => (
-                <div key={item.id}>
-                  <div className="flex flex-col sm:flex-row sm:justify-between cv-experience-header">
-                    <h3 
-                      className="font-medium text-sm sm:text-base"
-                      style={{ color: getColorValue("subHeadingColor") }}
-                    >
-                      {item.company}
-                    </h3>
-                    <div 
-                      className="flex items-center gap-1 text-xs sm:text-sm cv-daterange"
-                      style={{ color: getColorValue("textColor") }}
-                    >
-                      <Calendar className="h-3 w-3" />
-                      <span>
-                        {item.startDate} - {item.endDate}
-                      </span>
-                    </div>
-                  </div>
-                  <p 
-                    className="text-xs sm:text-sm font-medium"
-                    style={{ color: getColorValue("subHeadingColor") }}
-                  >
-                    {item.position}
-                    {item.location && `, ${item.location}`}
-                  </p>
-                  {item.description && (
-                    <p 
-                      className="mt-1 text-xs sm:text-sm whitespace-pre-line"
-                      style={{ color: getColorValue("textColor") }}
-                    >
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {section.type === "projects" && (
-            <div className="space-y-3 sm:space-y-4">
-              {(section.items as Project[]).map((item) => (
-                <div key={item.id}>
-                  <div className="flex flex-col sm:flex-row sm:justify-between cv-experience-header">
-                    <h3 
-                      className="font-medium text-sm sm:text-base"
-                      style={{ color: getColorValue("subHeadingColor") }}
-                    >
-                      {item.name}
-                    </h3>
-                    {(item.startDate || item.endDate) && (
+            {/* Olika rendering beroende på sektionstyp */}
+            {section.type === "education" && (
+              <div className="space-y-3 sm:space-y-4">
+                {(section.items as Education[]).map((item) => (
+                  <div key={item.id} className="cv-education-item">
+                    <div className="flex flex-col sm:flex-row sm:justify-between cv-education-header">
+                      <h3 
+                        className="font-medium text-sm sm:text-base"
+                        style={{ color: getColorValue("subHeadingColor") }}
+                      >
+                        {item.institution}
+                      </h3>
                       <div 
                         className="flex items-center gap-1 text-xs sm:text-sm cv-daterange"
                         style={{ color: getColorValue("textColor") }}
                       >
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {item.startDate && item.endDate 
-                            ? `${item.startDate} - ${item.endDate}`
-                            : item.startDate || item.endDate}
+                          {item.startDate} - {item.endDate}
                         </span>
                       </div>
+                    </div>
+                    <p 
+                      className="text-xs sm:text-sm font-medium"
+                      style={{ color: getColorValue("subHeadingColor") }}
+                    >
+                      {item.degree} i {item.field}
+                    </p>
+                    {item.description && (
+                      <p 
+                        className="mt-1 text-xs sm:text-sm whitespace-pre-wrap"
+                        style={{ color: getColorValue("textColor") }}
+                      >
+                        {item.description}
+                      </p>
                     )}
                   </div>
-                  {item.url && (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs underline"
+                ))}
+              </div>
+            )}
+
+            {section.type === "experience" && (
+              <div className="space-y-3 sm:space-y-4">
+                {(section.items as Experience[]).map((item) => (
+                  <div key={item.id} className="cv-experience-item">
+                    <div className="flex flex-col sm:flex-row sm:justify-between cv-experience-header">
+                      <h3 
+                        className="font-medium text-sm sm:text-base"
+                        style={{ color: getColorValue("subHeadingColor") }}
+                      >
+                        {item.company}
+                      </h3>
+                      <div 
+                        className="flex items-center gap-1 text-xs sm:text-sm cv-daterange whitespace-nowrap"
+                        style={{ color: getColorValue("textColor") }}
+                      >
+                        <Calendar className="h-3 w-3" />
+                        <span>
+                          {item.startDate} - {item.endDate}
+                        </span>
+                      </div>
+                    </div>
+                    <p 
+                      className="text-xs sm:text-sm font-medium"
+                      style={{ color: getColorValue("subHeadingColor") }}
+                    >
+                      {item.position}
+                      {item.location && `, ${item.location}`}
+                    </p>
+                    {item.description && (
+                      <p 
+                        className="mt-1 text-xs sm:text-sm whitespace-pre-wrap"
+                        style={{ color: getColorValue("textColor"), wordBreak: "break-word" }}
+                      >
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {section.type === "projects" && (
+              <div className="space-y-3 sm:space-y-4">
+                {(section.items as Project[]).map((item) => (
+                  <div key={item.id} className="cv-project-item">
+                    <div className="flex flex-col sm:flex-row sm:justify-between cv-experience-header">
+                      <h3 
+                        className="font-medium text-sm sm:text-base"
+                        style={{ color: getColorValue("subHeadingColor") }}
+                      >
+                        {item.name}
+                      </h3>
+                      {(item.startDate || item.endDate) && (
+                        <div 
+                          className="flex items-center gap-1 text-xs sm:text-sm cv-daterange whitespace-nowrap"
+                          style={{ color: getColorValue("textColor") }}
+                        >
+                          <Calendar className="h-3 w-3" />
+                          <span>
+                            {item.startDate && item.endDate 
+                              ? `${item.startDate} - ${item.endDate}`
+                              : item.startDate || item.endDate}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {item.url && (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs underline block truncate max-w-full"
+                        style={{ color: getColorValue("accentColor") }}
+                      >
+                        {item.url}
+                      </a>
+                    )}
+                    {item.description && (
+                      <p 
+                        className="mt-1 text-xs sm:text-sm whitespace-pre-wrap"
+                        style={{ color: getColorValue("textColor"), wordBreak: "break-word" }}
+                      >
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {section.type === "skills" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 cv-skills-grid">
+                {(section.items as Skill[]).map((item) => (
+                  <div 
+                    key={item.id}
+                    className="flex items-center gap-2 rounded-md border border-gray-200 p-2"
+                  >
+                    <div 
+                      className="flex items-center"
                       style={{ color: getColorValue("accentColor") }}
                     >
-                      {item.url}
-                    </a>
-                  )}
-                  {item.description && (
-                    <p 
-                      className="mt-1 text-xs sm:text-sm whitespace-pre-line"
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className="h-3 w-3"
+                          fill={i < item.level ? getColorValue("accentColor") : "none"}
+                        />
+                      ))}
+                    </div>
+                    <span 
+                      className="ml-1 sm:ml-2 text-xs sm:text-sm truncate"
                       style={{ color: getColorValue("textColor") }}
                     >
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {section.type === "skills" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 cv-skills-grid">
-              {(section.items as Skill[]).map((item) => (
-                <div 
-                  key={item.id}
-                  className="flex items-center gap-2 rounded-md border border-gray-200 p-2"
-                >
-                  <div 
-                    className="flex items-center"
-                    style={{ color: getColorValue("accentColor") }}
-                  >
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-3 w-3"
-                        fill={i < item.level ? getColorValue("accentColor") : "none"}
-                      />
-                    ))}
+                      {item.name}
+                    </span>
                   </div>
-                  <span 
-                    className="ml-1 sm:ml-2 text-xs sm:text-sm"
-                    style={{ color: getColorValue("textColor") }}
-                  >
-                    {item.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

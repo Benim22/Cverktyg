@@ -1,309 +1,285 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { use } from "react"
 import { Navbar } from "@/components/Navbar"
+import { MetaTags } from "@/components/MetaTags"
 import { PageTransition } from "@/components/animations/PageTransition"
-import { CV_TEMPLATES } from "@/data/templates"
-import { CVTemplate, DEFAULT_COLOR_SCHEME } from "@/types/cv"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Eye, FileText, ArrowLeft, Loader2 } from "lucide-react"
-import Link from "next/link"
 import { FadeIn } from "@/components/animations/FadeIn"
-import { useRouter } from "next/navigation"
-import { CVPreview } from "@/components/CVPreview"
-import { DEFAULT_CV } from "@/data/defaultCV"
-import { CVProvider } from "@/contexts/CVContext"
-import * as React from "react"
-import { createCV, getSupabaseClient } from "@/lib/supabase-client"
+import { AnimatedButton } from "@/components/animations/AnimatedButton"
+import { CV_TEMPLATES } from "@/data/templates"
+import { ArrowLeft, Palette, ArrowRight, Check, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { useCV, CVProvider } from "@/contexts/CVContext"
+import { PDFTemplateDisplay } from "@/components/PDFTemplateDisplay"
+import { motion } from "framer-motion"
 import { toast } from "sonner"
-import { v4 as uuidv4 } from "uuid"
-import { useSubscription } from "@/contexts/SubscriptionContext"
-import { PaywallModal } from "@/components/PaywallModal"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import defaultCV from "@/data/defaultCV"
 
-interface PreviewPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default function TemplatePreviewPage({ params }: PreviewPageProps) {
-  const router = useRouter()
-  // Använd React.use() för att packa upp params-objektet med explicit typning
-  const resolvedParams = React.use(params as unknown as Promise<{id: string}>)
-  const { id } = resolvedParams
-  const [template, setTemplate] = useState<CVTemplate | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [creating, setCreating] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const { isFreePlan } = useSubscription()
-  const [showPaywall, setShowPaywall] = useState(false)
-  
-  const MAX_FREE_CVS = 3
-
-  // Kontrollera om den aktuella mallen är en premium-mall
-  const isPremiumTemplate = (): boolean => {
-    return template?.isPremium === true;
-  }
-
-  useEffect(() => {
-    // Hitta mallen från CV_TEMPLATES
-    const foundTemplate = CV_TEMPLATES.find(t => t.id === id)
-    
-    if (foundTemplate) {
-      setTemplate(foundTemplate)
-    } else {
-      // Om mallen inte hittas, kolla i databasen (för användarens egna mallar)
-      // Detta skulle implementeras i en riktig applikation
-      console.error('Template not found:', id)
-    }
-    
-    // Kontrollera användarens autentiseringsstatus
-    const checkAuth = async () => {
-      const supabase = getSupabaseClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (session) {
-        setUser(session.user)
-      }
-    }
-    
-    checkAuth()
-    setLoading(false)
-  }, [id])
-
-  // Skapa en kopia av standardCV:t med den valda mallen
-  const previewCV = {
-    ...DEFAULT_CV,
-    templateId: template?.id || "standard",
-    colorScheme: template?.colorScheme || DEFAULT_COLOR_SCHEME
-  }
-  
-  // Hantera skapande av CV direkt från mallens förhandsgranskning
-  const handleCreateCV = async () => {
-    if (!user) {
-      toast.error("Du måste vara inloggad för att skapa ett CV")
-      router.push("/auth/signin?redirect=" + encodeURIComponent(`/templates/${id}`))
-      return
-    }
-    
-    if (!template) {
-      toast.error("Ingen mall vald")
-      return
-    }
-    
-    try {
-      setCreating(true)
-      
-      // Kontrollera om användaren är på gratisplanen och redan har nått max antal CV:n
-      if (isFreePlan()) {
-        // Hämta användarens nuvarande antal CV:n
-        const supabase = getSupabaseClient()
-        const { data: userCVs, error: cvError } = await supabase
-          .from('cvs')
-          .select('id')
-          .eq('user_id', user.id)
-        
-        if (cvError) {
-          console.error("Fel vid hämtning av användarens CV:n:", cvError)
-          toast.error("Kunde inte kontrollera dina CV:n")
-          setCreating(false)
-          return
-        }
-        
-        if (userCVs && userCVs.length >= MAX_FREE_CVS) {
-          // Visa paywall-modalen istället för felmeddelandet
-          setCreating(false)
-          setShowPaywall(true)
-          return
-        }
-      }
-      
-      // Skapa tomt CV med bara grundstruktur och mall-inställningar
-      const { data, error } = await createCV(user.id, {
-        title: "Nytt CV",
-        template_id: template.id,
-        content: {
-          templateId: template.id, // Spara mallens ID
-          colorScheme: template.colorScheme, // Använd mallens färgschema
-          
-          // Skapa tom personalInfo
-          personalInfo: {
-            firstName: "",
-            lastName: "",
-            email: "",
-            phone: "",
-            address: "",
-            city: "",
-            country: "",
-            postalCode: "",
-            title: "",
-            website: "",
-            summary: ""
-          },
-          
-          // Skapa tomma grundsektioner baserat på mall-typ
-          sections: [
-            {
-              id: uuidv4(),
-              type: "experience",
-              title: "Arbetslivserfarenhet",
-              items: []
-            },
-            {
-              id: uuidv4(),
-              type: "education",
-              title: "Utbildning",
-              items: []
-            },
-            {
-              id: uuidv4(),
-              type: "skills",
-              title: "Kompetenser",
-              items: []
-            }
-          ]
-        }
-      })
-      
-      if (error) {
-        console.error("Fel vid skapande av CV:", error)
-        toast.error("Kunde inte skapa nytt CV")
-        setCreating(false)
-        return
-      }
-      
-      // Navigera direkt till editor med det nya CV-id:t
-      const newCvId = data[0].id
-      router.push(`/editor/${newCvId}`)
-    } catch (error) {
-      console.error("Fel vid skapande av CV:", error)
-      toast.error("Kunde inte skapa nytt CV")
-      setCreating(false)
-    }
-  }
+export default function TemplateDetailWrapper({ params }: { params: { id: string } }) {
+  // Använd React.use för att hantera params som ett Promise
+  const resolvedParams = use(params);
   
   return (
-    <CVProvider initialCV={previewCV}> {/* Skicka med previewCV som initialCV istället för att försöka hämta från databas */}
+    <CVProvider initialCV={defaultCV}>
+      <TemplateDetail params={resolvedParams} />
+    </CVProvider>
+  )
+}
+
+function TemplateDetail({ params }: { params: { id: string } }) {
+  const router = useRouter()
+  const [isChanging, setIsChanging] = useState(false)
+  const { currentCV, setTemplate } = useCV()
+  const template = CV_TEMPLATES.find(t => t.id === params.id)
+  
+  // Hitta nästa och föregående mall för navigation
+  const templateIndex = CV_TEMPLATES.findIndex(t => t.id === params.id)
+  const prevTemplate = templateIndex > 0 ? CV_TEMPLATES[templateIndex - 1] : null
+  const nextTemplate = templateIndex < CV_TEMPLATES.length - 1 ? CV_TEMPLATES[templateIndex + 1] : null
+  
+  if (!template) {
+    return (
+      <>
+        <Navbar />
+        <PageTransition>
+          <div className="container py-10">
+            <FadeIn>
+              <div className="text-center">
+                <h1 className="text-3xl font-bold mb-6">Mallen hittades inte</h1>
+                <AnimatedButton asChild>
+                  <Link href="/templates/all">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Tillbaka till mallar
+                  </Link>
+                </AnimatedButton>
+              </div>
+            </FadeIn>
+          </div>
+        </PageTransition>
+      </>
+    )
+  }
+  
+  // Funktion för att välja denna mall
+  const handleSelectTemplate = async () => {
+    try {
+      setIsChanging(true)
+      
+      if (currentCV) {
+        await setTemplate(template.id)
+        
+        toast.success("Mallen har ändrats", {
+          description: "Ditt CV har uppdaterats med den nya mallen",
+          action: {
+            label: "Visa CV",
+            onClick: () => router.push("/editor")
+          }
+        })
+      } else {
+        // Om inget CV finns visar vi bara ett meddelande om att de måste skapa ett först
+        toast.info("Skapa ett CV först", {
+          description: "Du måste skapa ett CV innan du kan ändra mall",
+          action: {
+            label: "Skapa CV",
+            onClick: () => router.push("/dashboard")
+          }
+        })
+      }
+    } catch (error) {
+      toast.error("Något gick fel", {
+        description: "Kunde inte ändra mall, försök igen senare"
+      })
+    } finally {
+      setIsChanging(false)
+    }
+  }
+  
+  const isCurrentTemplate = currentCV?.templateId === template.id
+  
+  return (
+    <>
+      <MetaTags 
+        title={`${template.name} CV-mall - Professionell CV-design`}
+        description={`${template.description}. Använd denna mall för att skapa ett professionellt CV som hjälper dig att sticka ut bland andra sökande.`}
+        keywords={`${template.name} cv-mall, ${template.category} cv-design, professionell cv-mall, ${template.id} cv-mall`}
+        ogUrl={`https://cverktyg.se/templates/${template.id}`}
+      />
       <Navbar />
       <PageTransition>
         <div className="container py-10">
-          <div className="flex items-center mb-8">
-            <Button variant="ghost" onClick={() => router.back()} className="mr-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Tillbaka
-            </Button>
-            
-            {loading ? (
-              <Skeleton className="h-8 w-40" />
-            ) : (
-              <h1 className="text-3xl font-bold">{template?.name || "Mall saknas"}</h1>
-            )}
-          </div>
-          
-          {loading ? (
-            <div className="w-full flex justify-center py-20">
-              <div className="w-full max-w-3xl aspect-[210/297] bg-muted/30 rounded-md animate-pulse" />
-            </div>
-          ) : template ? (
-            <FadeIn>
-              <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
-                <div className="w-full flex justify-center">
-                  <div className="w-full max-w-3xl shadow-lg rounded-md overflow-hidden">
-                    <CVPreview />
-                  </div>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-semibold mb-2">{template.name}</h2>
-                    <p className="text-muted-foreground">{template.description}</p>
-                  </div>
-                  
-                  <div className="border rounded-md p-4 space-y-3">
-                    <h3 className="font-medium">Mallinformation</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>Layout:</div>
-                      <div className="font-medium capitalize">{template.layout}</div>
-                      
-                      <div>Typsnitt rubriker:</div>
-                      <div className="font-medium">{template.fontSettings?.headingFont || "Standard"}</div>
-                      
-                      <div>Typsnitt text:</div>
-                      <div className="font-medium">{template.fontSettings?.bodyFont || "Standard"}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="border rounded-md p-4">
-                    <h3 className="font-medium mb-3">Färgschema</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.entries(template.colorScheme).map(([key, color]) => (
-                        <div key={key} className="flex flex-col items-center">
-                          <div 
-                            className="w-10 h-10 rounded-full border shadow-sm" 
-                            style={{ backgroundColor: color }}
-                          />
-                          <span className="text-xs mt-1">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    size="lg" 
-                    className="w-full mt-6"
-                    onClick={handleCreateCV}
-                    disabled={creating || (isPremiumTemplate() && isFreePlan())}
+          <FadeIn>
+            <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Link 
+                    href="/templates/all" 
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {creating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Skapar...
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Skapa CV med denna mall
-                      </>
-                    )}
-                  </Button>
-                  
-                  <Link href="/templates/all" passHref>
-                    <Button variant="outline" size="lg" className="w-full">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Se alla mallar
-                    </Button>
+                    <ArrowLeft className="h-3.5 w-3.5 inline mr-1" />
+                    Mallar
                   </Link>
+                  <span className="text-muted-foreground">/</span>
+                  <h1 className="text-xl font-semibold">{template.name}</h1>
+                  {template.isPremium && (
+                    <motion.div 
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 500, 
+                        damping: 15,
+                        delay: 0.3
+                      }}
+                      className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-amber-200 to-yellow-400 text-amber-900 rounded-full flex items-center"
+                    >
+                      Premium
+                    </motion.div>
+                  )}
                 </div>
+                <p className="text-muted-foreground max-w-2xl">
+                  {template.description}
+                </p>
               </div>
-            </FadeIn>
-          ) : (
-            <div className="text-center py-20">
-              <h2 className="text-2xl font-bold text-muted-foreground mb-4">
-                Kunde inte hitta mallen
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Den mall du söker finns inte eller har tagits bort.
-              </p>
-              <Link href="/templates/all" passHref>
-                <Button>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Se alla tillgängliga mallar
+              
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={handleSelectTemplate}
+                  disabled={isChanging || isCurrentTemplate}
+                  className="min-w-36"
+                >
+                  {isChanging ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Ändrar...
+                    </>
+                  ) : isCurrentTemplate ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Aktiv mall
+                    </>
+                  ) : (
+                    "Använd denna mall"
+                  )}
                 </Button>
-              </Link>
+              </div>
             </div>
-          )}
+          </FadeIn>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <FadeIn delay={0.1}>
+                <PDFTemplateDisplay templateId={template.id} />
+              </FadeIn>
+            </div>
+            
+            <div>
+              <FadeIn delay={0.2}>
+                <div className="sticky top-20 space-y-6">
+                  <div className="rounded-lg border bg-card shadow-sm">
+                    <div className="p-4 border-b">
+                      <h3 className="font-medium">Mallinformation</h3>
+                    </div>
+                    
+                    <div className="p-4 space-y-4">
+                      <div>
+                        <h4 className="text-sm font-medium mb-1">Mall-ID</h4>
+                        <p className="text-sm text-muted-foreground">{template.id}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-sm font-medium mb-1">Layout</h4>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {template.layout === "standard" ? "Standard" :
+                           template.layout === "modern" ? "Modern" :
+                           template.layout === "minimalist" ? "Minimalistisk" :
+                           template.layout === "creative" ? "Kreativ" :
+                           template.layout === "professional" ? "Professionell" :
+                           template.layout === "executive" ? "Executive" :
+                           template.layout === "academic" ? "Akademisk" :
+                           template.layout === "technical" ? "Teknisk" :
+                           template.layout}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-sm font-medium mb-1">Kategori</h4>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {template.category === "business" ? "Företag" :
+                           template.category === "creative" ? "Kreativ" :
+                           template.category === "academic" ? "Akademisk" :
+                           template.category === "technical" ? "Teknisk" :
+                           template.category}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-sm font-medium mb-1">Typsnitt</h4>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Rubriker: {template.fontSettings?.headingFont?.split(",")[0]}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Brödtext: {template.fontSettings?.bodyFont?.split(",")[0]}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-sm font-medium mb-1">Färgschema</h4>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <div 
+                            className="w-6 h-6 rounded-full border"
+                            style={{ backgroundColor: template.colorScheme.primaryColor }}
+                            title="Primärfärg"
+                          />
+                          <div 
+                            className="w-6 h-6 rounded-full border"
+                            style={{ backgroundColor: template.colorScheme.secondaryColor }}
+                            title="Sekundärfärg"
+                          />
+                          <div 
+                            className="w-6 h-6 rounded-full border"
+                            style={{ backgroundColor: template.colorScheme.accentColor }}
+                            title="Accentfärg"
+                          />
+                          <div 
+                            className="w-6 h-6 rounded-full border"
+                            style={{ backgroundColor: template.colorScheme.backgroundColor }}
+                            title="Bakgrundsfärg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    {prevTemplate ? (
+                      <AnimatedButton variant="outline" asChild size="sm">
+                        <Link href={`/templates/${prevTemplate.id}`}>
+                          <ArrowLeft className="h-4 w-4 mr-2" />
+                          {prevTemplate.name}
+                        </Link>
+                      </AnimatedButton>
+                    ) : <div />}
+                    
+                    {nextTemplate && (
+                      <AnimatedButton variant="outline" asChild size="sm">
+                        <Link href={`/templates/${nextTemplate.id}`}>
+                          {nextTemplate.name}
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Link>
+                      </AnimatedButton>
+                    )}
+                  </div>
+                </div>
+              </FadeIn>
+            </div>
+          </div>
         </div>
       </PageTransition>
-      
-      {/* Paywall modal */}
-      <PaywallModal 
-        isOpen={showPaywall} 
-        onClose={() => setShowPaywall(false)} 
-        type="cvLimit"
-        title="Uppgradera för att skapa fler CV:n"
-        description={`Gratisversionen tillåter max ${MAX_FREE_CVS} CV:n. Uppgradera för att skapa fler och få tillgång till premiummallar.`}
-      />
-    </CVProvider>
+    </>
   )
-} 
+}

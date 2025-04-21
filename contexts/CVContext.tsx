@@ -30,6 +30,8 @@ interface CVContextType {
   getTemplateById: (templateId: string) => CVTemplate | undefined
   lastSaveTime: Date | null
   isAutoSaving: boolean
+  zoomScale: number
+  setZoomScale: (scale: number) => void
 }
 
 const CVContext = createContext<CVContextType | undefined>(undefined)
@@ -64,6 +66,7 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
   const [isAutoSaving, setIsAutoSaving] = useState(false)
   const [lastSavedCV, setLastSavedCV] = useState<CV | null>(null)
+  const [zoomScale, setZoomScale] = useState<number>(1)
 
   // Spara CV till databasen funktion
   const saveCVToDatabase = async () => {
@@ -122,6 +125,62 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
           
           // Om vi har ett cvId, hämta det CV:t från databasen
           if (cvId && !initialCV) {
+            // Definiera fetchCV inuti denna funktion
+            const fetchCV = async (cvId: string, userId: string) => {
+              try {
+                // Kontrollera om cvId är ett template-id istället för ett UUID
+                const isTemplatePath = CV_TEMPLATES.some(template => template.id === cvId);
+                
+                if (isTemplatePath) {
+                  console.log("Detta verkar vara ett template-id och inte ett CV-id:", cvId);
+                  // Omdirigera till mallsidan istället för att försöka hämta CV
+                  router.push(`/templates/${cvId}`);
+                  return;
+                }
+                
+                console.log("Hämtar CV med ID:", cvId, "för användare:", userId);
+                const { data, error } = await getCV(cvId, userId)
+                
+                if (error) {
+                  console.error("Fel vid hämtning av CV:", error || "Okänt fel", "Detaljer:", JSON.stringify(error));
+                  toast.error("Kunde inte ladda CV-data. Försök igen senare.");
+                  // Navigera till dashboard om det är ett problem med att hämta CV
+                  router.push("/dashboard")
+                  return
+                }
+                
+                if (!data) {
+                  console.error("Ingen data hittades för detta CV-ID")
+                  toast.error("Hittar inte det efterfrågade CV:t")
+                  router.push("/dashboard")
+                  return
+                }
+                
+                // Konvertera databasens format till appens interna format
+                const cvData = data.content || {}
+                setCurrentCV({
+                  id: data.id,
+                  title: data.title || "Namnlöst CV",
+                  personalInfo: cvData.personalInfo || {},
+                  sections: cvData.sections || [],
+                  colorScheme: cvData.colorScheme || { ...DEFAULT_COLOR_SCHEME },
+                  createdAt: data.created_at,
+                  updatedAt: data.updated_at,
+                  templateId: cvData.templateId || "standard",
+                })
+                
+                toast.success(`CV "${data.title || 'Namnlöst CV'}" har laddats`)
+              } catch (error: any) {
+                console.error("Fel vid hämtning av CV:", 
+                  error?.message || error || "Okänt fel", 
+                  "Stack:", error?.stack,
+                  "Detaljer:", typeof error === 'object' ? JSON.stringify(error) : error
+                );
+                toast.error("Ett fel uppstod när CV:t skulle laddas. Försök igen senare.")
+                router.push("/dashboard")
+              }
+            }
+            
             await fetchCV(cvId, user.id)
           }
         } else {
@@ -141,69 +200,7 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
     }
     
     getUserSession()
-  }, [cvId, initialCV])
-
-  // Hämta CV-data om det är ett befintligt CV och inget initialCV redan skickats med
-  useEffect(() => {
-    // Hoppa över hämtning från databasen om initialCV redan har skickats med
-    if (initialCV) {
-      setLoading(false);
-      return;
-    }
-
-    if (cvId && userId) {
-      const fetchCV = async () => {
-        try {
-          setLoading(true)
-          
-          console.log("Hämtar CV med ID:", cvId, "för användare:", userId);
-          const { data, error } = await getCV(cvId, userId)
-          
-          if (error) {
-            console.error("Fel vid hämtning av CV:", error || "Okänt fel", "Detaljer:", JSON.stringify(error));
-            toast.error("Kunde inte ladda CV-data. Försök igen senare.");
-            // Navigera till dashboard om det är ett problem med att hämta CV
-            router.push("/dashboard")
-            return
-          }
-          
-          if (!data) {
-            console.error("Ingen data hittades för detta CV-ID")
-            toast.error("Hittar inte det efterfrågade CV:t")
-            router.push("/dashboard")
-            return
-          }
-          
-          // Konvertera databasens format till appens interna format
-          const cvData = data.content || {}
-          setCurrentCV({
-            id: data.id,
-            title: data.title || "Namnlöst CV",
-            personalInfo: cvData.personalInfo || {},
-            sections: cvData.sections || [],
-            colorScheme: cvData.colorScheme || { ...DEFAULT_COLOR_SCHEME },
-            createdAt: data.created_at,
-            updatedAt: data.updated_at,
-            templateId: cvData.templateId || "standard",
-          })
-          
-          toast.success(`CV "${data.title || 'Namnlöst CV'}" har laddats`)
-        } catch (error: any) {
-          console.error("Fel vid hämtning av CV:", 
-            error?.message || error || "Okänt fel", 
-            "Stack:", error?.stack,
-            "Detaljer:", typeof error === 'object' ? JSON.stringify(error) : error
-          );
-          toast.error("Ett fel uppstod när CV:t skulle laddas. Försök igen senare.")
-          router.push("/dashboard")
-        } finally {
-          setLoading(false)
-        }
-      }
-      
-      fetchCV()
-    }
-  }, [cvId, userId, router, initialCV])
+  }, [cvId, initialCV, router])
 
   const setPersonalInfo = (info: PersonalInfo) => {
     setCurrentCV((prev) => ({
@@ -440,13 +437,6 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
     }
   }, [currentCV, userId, loading, lastSavedCV, initialCV])
   
-  // Lyssna på ändringar i CV-data och spara automatiskt
-  useEffect(() => {
-    if (currentCV && userId && !loading && !initialCV) {
-      autoSave.autoSave()
-    }
-  }, [currentCV, userId, loading, initialCV])
-
   // Uppdatera saveCV-funktionen för att också sätta lastSaveTime
   const saveCV = async (): Promise<string> => {
     // Om det är ett initialCV (preview) ska vi inte försöka spara till databasen
@@ -501,7 +491,9 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
         setTemplate,
         getTemplateById,
         lastSaveTime,
-        isAutoSaving
+        isAutoSaving,
+        zoomScale,
+        setZoomScale
       }}
     >
       {children}

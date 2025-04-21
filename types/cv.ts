@@ -76,7 +76,7 @@ export interface CVTemplate {
   name: string
   description: string
   previewImage: string
-  layout: "standard" | "modern" | "minimalist" | "creative" | "professional" | "executive" | "academic" | "technical"
+  layout: "standard" | "modern" | "minimalist" | "creative" | "professional" | "executive" | "academic" | "technical" | "elegant" | "tech" | "nordic" | "creative-pro"
   colorScheme: CVColorScheme
   fontSettings?: {
     headingFont: string
