@@ -8,24 +8,30 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
 
 // CV-specifik systemkontext för att guida AI:n
 const CV_SYSTEM_CONTEXT = `
-Du är en professionell CV-expert med omfattande erfarenhet av rekrytering och HR.
+Du är en professionell CV-expert med omfattande erfarenhet av rekrytering, HR och karriärvägledning på den svenska arbetsmarknaden.
 Din uppgift är att optimera CV-texter för att presentera kvalifikationer, erfarenheter och kompetenser
-på bästa möjliga sätt.
+på bästa möjliga sätt på svenska.
 
 Följ dessa riktlinjer:
-1. Använd kraftfulla verb och precisa formuleringar
-2. Fokusera på uppnådda resultat och mätbara prestationer
-3. Anpassa språket till aktuell bransch och roll
-4. Håll texten koncis och professionell
-5. Lyft fram relevanta nyckelord för ATS-system
-6. Behåll personens ursprungliga meriter och sanning
-7. Använd aktivt språk istället för passivt
-8. Håll tonen professionell men personlig
-9. Betona hur kandidatens handlingar skapade värde
-10. Översätt inte innehållet - behåll originalspråket (svenska eller engelska)
+1. Använd kraftfulla och precisa verbfraser i början av varje punkt (t.ex. "utvecklade", "implementerade", "effektiviserade")
+2. Fokusera på uppnådda resultat och kvantifiera prestationer med siffror där möjligt (t.ex. "ökade försäljningen med 25%")
+3. Använd branschspecifik terminologi som matchar den aktuella positionen eller branschen
+4. Håll texten koncis och professionell - använd tydlig och direkt kommunikation
+5. Inkludera relevanta nyckelord för ATS-system utan att det känns onaturligt
+6. Behåll personens ursprungliga meriter och var helt sanningsenlig
+7. Använd aktivt språk och undvik passiva konstruktioner
+8. Var personlig men behåll en professionell ton genomgående
+9. Betona värdeskapande aktiviteter - hur kandidatens insatser ledde till konkreta fördelar
+10. Använd korrekt svensk grammatik och stavning
+
+För olika delar av CV:t:
+* Personliga sammanfattningar: Skapa en stark, koncis introduktion (3-5 meningar) som snabbt fångar läsarens intresse
+* Erfarenhetsbeskrivningar: Strukturera som tydliga punkter med fokus på resultat och ansvarsområden
+* Kompetensbeskrivningar: Kategorisera tydligt och visa behärskningsnivå där relevant
+* Projektbeskrivningar: Betona din roll, projektets syfte och det uppnådda resultatet
 
 Du ska aldrig hitta på nya upplevelser eller kvalifikationer, utan endast omformulera 
-och förbättra det befintliga innehållet.
+och förbättra det befintliga innehållet på ett professionellt sätt som ökar chansen till arbetsintervju.
 `
 
 // Generella inställningar för API:et
@@ -76,20 +82,22 @@ export async function improveExperienceText(
     ${description}
     
     Förbättra denna text genom att:
-    - Använda kraftfulla verbfraser i början av varje punkt
-    - Lyfta fram konkreta resultat och prestationer med siffror om möjligt
-    - Använda branschrelevanta nyckelord
+    - Använda kraftfulla verbfraser i början av varje punkt (som "utvecklade", "implementerade", "effektiviserade", "optimerade")
+    - Lyfta fram konkreta resultat och kvantifiera prestationer med siffror där möjligt (t.ex. "Ökade försäljningen med 25%" eller "Effektiviserade processer som sparade 10 timmar per vecka")
+    - Inkludera branschrelevanta nyckelord som passar för tjänsten och företaget
     - Strukturera texten som tydliga punkter (en mening per punkt)
-    - Behålla det väsentliga innehållet men göra det mer professionellt
+    - Lyfta fram ansvar, prestationer och konkreta bidrag som visar värdet av ditt arbete
+    - Visa på progression och utveckling i rollen om relevant
     - Begränsa till max 4-5 tydliga punkter
     
     VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. exakta siffror, teknologier):
+    - Fokusera på resultat och värdeskapande aktiviteter även utan exakta siffror
     - Lämna INTE platshållare som [Specificera X]
-    - Skriv istället texten så att den fungerar utan den specifika informationen
+    - Skriv istället texten så att den fungerar utan den specifika informationen och uppmuntrar läsaren att fråga mer
     - Undvik att nämna specifika teknologier om de inte redan fanns i originaltexten
     
     Ge texten i form av tydliga punkter där varje punkt börjar med en kraftfull verbfras.
-    Behåll originalspråket (svenska eller engelska).
+    Behåll svenska som språk.
     Använd en tydlig punktlista där varje punkt är på en egen rad med en tom rad mellan dem.
     `
 
@@ -163,20 +171,23 @@ export async function improveEducationText(
     ${description}
     
     Förbättra denna text genom att:
-    - Betona relevanta kurser och kunskaper
-    - Lyfta fram eventuella prestationer eller utmärkelser
-    - Strukturera texten som tydliga punkter (en mening per punkt)
-    - Börja varje punkt med en aktiv verbfras
-    - Fokusera på uppnådda färdigheter och relevanta projekt
-    - Begränsa till max 3-4 tydliga punkter
+    - Betona konkreta kunskaper och färdigheter som erhållits genom utbildningen
+    - Lyfta fram relevanta kurser, projekt och examensarbeten som är särskilt värdefulla för arbetsmarknaden
+    - Framhäva prestationer, utmärkelser eller stipendier om sådana finns
+    - Visa hur utbildningen är relevant för den karriär kandidaten eftersträvar
+    - Använda aktiva verbfraser i början av varje punkt (t.ex. "förvärvade djupgående kunskaper inom", "utvecklade färdigheter i")
+    - Inkludera viktiga metoder, teorier eller teknologier som lärts ut i utbildningen
+    - Nämna samarbetsprojekt eller praktiska erfarenheter som del av utbildningen
+    - Begränsa till 3-4 tydliga punkter som visar värdet av utbildningen
     
-    VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. exakta kurser, projekt):
-    - Lämna INTE platshållare som [Specificera X]
-    - Skriv istället texten så att den fungerar utan den specifika informationen
-    - Undvik att hitta på kurser eller projekt som inte nämndes i originaltexten
+    VIKTIG INSTRUKTION: Om det saknas specifik information:
+    - Fokusera på det som faktiskt nämns i den ursprungliga texten
+    - Undvik att hitta på kurser eller specifika projekt som inte nämndes i originaltexten
+    - Formulera texten så att den visar värdet av utbildningen även utan specifika detaljer
+    - Använd branschrelevanta termer som är kopplade till utbildningsområdet
     
     Ge texten i form av tydliga punkter där varje punkt börjar med en aktiv verbfras.
-    Behåll originalspråket (svenska eller engelska).
+    Språket ska vara svenska och ha en professionell ton.
     Använd en tydlig punktlista där varje punkt är på en egen rad med en tom rad mellan dem.
     `
 
@@ -248,20 +259,23 @@ export async function improveSummary(
     ${summary}
     
     Förbättra denna sammanfattning genom att:
-    - Göra den mer koncis och professionell men personlig
-    - Betona konkreta nyckelkompetenser och styrkor
-    - Använda branschrelevant terminologi (ENDAST om den nämns i originaltexten)
-    - Skapa en stark inledning som fångar uppmärksamhet
-    - Begränsa till 2-3 korta stycken (5-6 meningar totalt)
-    - Undvika klichéer och tomma fraser (som "driven" eller "passionerad")
+    - Skapa en stark inledande mening som fångar uppmärksamhet och tydligt definierar kandidatens yrkesidentitet
+    - Betona specifika nyckelkompetenser och expertisområden som är relevanta för yrkesrollen
+    - Lyfta fram konkreta prestationer och resultat med siffror när möjligt (t.ex. "förbättrat processeffektiviteten med 30%")
+    - Inkludera relevant erfarenhet och antalet år inom branschen för att understryka expertis
+    - Nämna särskiljande egenskaper som gör kandidaten unik (specialistkunskaper, certifieringar, etc.)
+    - Avsluta med en tydlig formulering av vad kandidaten kan bidra med till en arbetsgivare
+    - Begränsa till 3-5 meningar eller max 2 korta stycken (totalt 6-8 rader)
+    - Ge ett modernt och professionellt intryck som är anpassat till svensk arbetsmarknad
     
-    VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. specifika färdigheter, teknologier):
-    - Lämna INTE platshållare som [Specificera X]
-    - Skriv istället texten så att den fungerar utan den specifika informationen
+    VIKTIG INSTRUKTION: Om det saknas specifik information:
+    - Fokusera på det som faktiskt nämns i den ursprungliga texten
+    - Undvik klichéer och generiska beskrivningar (som endast "driven" eller "passionerad")
     - Undvik att hitta på kompetenser eller erfarenheter som inte nämndes i originaltexten
+    - Skapa en sammanfattning som känns personlig och unik, inte en generisk mall
     
-    Ge en sammanhängande text i korta stycken som flyter naturligt. Använd radbrytningar mellan styckena.
-    Behåll originalspråket (svenska eller engelska).
+    Ge en sammanhängande text i korta, kraftfulla meningar som flyter naturligt. Använd radbrytningar mellan styckena.
+    Språket ska vara svenska och ha en professionell ton.
     `
 
     const result = await model.generateContent({
@@ -321,21 +335,24 @@ export async function improveProjectText(
     ${description}
     
     Förbättra denna beskrivning genom att:
-    - Betona konkreta resultat och specifika bidrag
-    - Inkludera tekniker/metoder som används (ENDAST om de nämns i originaltexten)
-    - Strukturera texten som tydliga punkter (en mening per punkt)
-    - Börja varje punkt med en kraftfull verbfras
-    - Lyfta fram utmaningar som övervunnits och lösningar
-    - Framhäva positiv påverkan
-    - Begränsa till max 3-4 tydliga punkter
+    - Inleda varje punkt med kraftfulla, aktionsorienterade verb som visar på ledarskap och initiativförmåga
+    - Tydligt definiera din specifika roll och ditt ansvarsområde i projektet
+    - Beskriva projektets syfte och omfattning på ett koncist sätt
+    - Betona konkreta resultat och mätbara framgångar med siffror när möjligt (t.ex. "slutförde projektet 15% under budget")
+    - Framhäva problem som löstes och utmaningar som övervunnits
+    - Inkludera relevanta metoder, tekniker eller verktyg som användes (ENDAST om de nämns i originaltexten)
+    - Visa på affärsvärdet och den positiva påverkan projektet hade
+    - Lyfta fram samarbete och gruppresultat med fokus på din del i processen
+    - Begränsa till 3-4 tydliga och informativa punkter
     
-    VIKTIG INSTRUKTION: Om det saknas specifik information (t.ex. tekniker, resultat):
-    - Lämna INTE platshållare som [Specificera X]
-    - Skriv istället texten så att den fungerar utan den specifika informationen
-    - Undvik att hitta på tekniker eller specifika mätvärden som inte nämndes i originaltexten
+    VIKTIG INSTRUKTION: Om det saknas specifik information:
+    - Fokusera på det som faktiskt nämns i den ursprungliga texten
+    - Undvik att hitta på tekniker, resultat eller specifika mätvärden som inte nämndes i originaltexten
+    - Formulera texten så att den visar projektets värde och ditt bidrag även utan detaljerad information
+    - Använd termer och uttryck som är värdeskapande och visar på professionalism
     
     Ge texten i form av tydliga punkter där varje punkt börjar med en kraftfull verbfras.
-    Behåll originalspråket (svenska eller engelska).
+    Språket ska vara svenska och ha en professionell ton.
     Använd en tydlig punktlista där varje punkt är på en egen rad med en tom rad mellan dem.
     `
 

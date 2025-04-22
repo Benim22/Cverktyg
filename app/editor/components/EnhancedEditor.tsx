@@ -1,10 +1,10 @@
 "use client"
 
 import { useCV } from "@/contexts/CVContext"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PersonalInfoForm } from "@/components/PersonalInfoForm"
 import { SectionsList } from "@/components/SectionsList"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Plus, Save, Loader2, Palette, User, Layers, Settings, SplitSquareVertical, Layout } from "lucide-react"
 import {
   Dialog,
@@ -24,9 +24,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNow } from "date-fns"
 import { sv } from "date-fns/locale"
-import { A4CVPreview } from "@/components/A4CVPreview"
 import Link from "next/link"
 import { TemplateGallery } from "@/components/templates/TemplateGallery"
+import { ResizableEditorLayout } from "./ResizableEditorLayout"
+import { CustomTabsContent } from "./CustomTabs"
 
 export function EnhancedEditor() {
   const { currentCV, addSection, saveCV, loading, lastSaveTime, isAutoSaving } = useCV()
@@ -38,6 +39,26 @@ export function EnhancedEditor() {
   const [newSectionType, setNewSectionType] = useState<string>("education")
   const [newSectionTitle, setNewSectionTitle] = useState<string>("")
   const [showSplitView, setShowSplitView] = useState<boolean>(true)
+  const [cvTitle, setCvTitle] = useState<string>("")
+  
+  // Referens till original CV-titeln för att se om den har ändrats
+  const originalTitleRef = useRef<string>("");
+  
+  // Synkronisera cvTitle med currentCV.title när currentCV uppdateras
+  useEffect(() => {
+    if (currentCV?.title) {
+      setCvTitle(currentCV.title);
+      originalTitleRef.current = currentCV.title;
+    }
+  }, [currentCV?.title]);
+
+  // Denna hook används för att uppdatera CV-titeln i URL:en och document.title
+  useEffect(() => {
+    if (cvTitle && cvTitle !== originalTitleRef.current) {
+      // Om titeln har ändrats, uppdatera document.title
+      document.title = `${cvTitle} | CV Editor`;
+    }
+  }, [cvTitle]);
 
   // Animationsvarianter
   const containerVariants = {
@@ -115,6 +136,35 @@ export function EnhancedEditor() {
     })}`
   }
 
+  // Funktion för att uppdatera titeln i heading och spara
+  const handleUpdateTitle = async () => {
+    try {
+      if (currentCV && cvTitle !== originalTitleRef.current) {
+        // Uppdatera titeln i dokumentet och URL:en
+        document.title = `${cvTitle} | CV Editor`;
+        
+        // Spara den nya titeln
+        // Vi har inte möjlighet att direkt uppdatera currentCV.title, så vi sparar bara
+        await saveCV();
+        
+        // Uppdatera originalTitleRef för att undvika att triggra fler sparningar i onödan
+        originalTitleRef.current = cvTitle;
+        
+        toast({
+          title: "Titel uppdaterad",
+          description: "CV-titeln har uppdaterats",
+        });
+      }
+    } catch (error) {
+      console.error("Fel vid uppdatering av titel:", error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte uppdatera titeln",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col gap-4">
@@ -128,6 +178,146 @@ export function EnhancedEditor() {
     )
   }
 
+  // Skapa tabs-innehåll som vi passerar till layouten
+  const tabsContent = (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="personal" className="rounded-full">
+          <User className="mr-2 h-4 w-4" />
+          Personuppgifter
+        </TabsTrigger>
+        <TabsTrigger value="sections" className="rounded-full">
+          <Layers className="mr-2 h-4 w-4" />
+          Sektioner
+        </TabsTrigger>
+        <TabsTrigger value="templates" className="rounded-full">
+          <Palette className="mr-2 h-4 w-4" />
+          Mallar
+        </TabsTrigger>
+        <TabsTrigger value="settings" className="rounded-full">
+          <Settings className="mr-2 h-4 w-4" />
+          Inställningar
+        </TabsTrigger>
+      </TabsList>
+      
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+        >
+          <CustomTabsContent value="personal" className="mt-4">
+            <PersonalInfoForm />
+          </CustomTabsContent>
+          <CustomTabsContent value="sections" className="mt-4">
+            <div className="mb-4 flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Sektioner</h2>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="rounded-full">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Lägg till sektion
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Lägg till ny sektion</DialogTitle>
+                    <DialogDescription>Välj typ av sektion och ange en titel.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="section-type">Typ av sektion</Label>
+                      <Select value={newSectionType} onValueChange={setNewSectionType}>
+                        <SelectTrigger id="section-type">
+                          <SelectValue placeholder="Välj typ" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="education">Utbildning</SelectItem>
+                          <SelectItem value="experience">Erfarenhet</SelectItem>
+                          <SelectItem value="projects">Projekt</SelectItem>
+                          <SelectItem value="skills">Färdigheter</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="section-title">Titel</Label>
+                      <Input
+                        id="section-title"
+                        value={newSectionTitle}
+                        onChange={(e) => setNewSectionTitle(e.target.value)}
+                        placeholder="T.ex. Utbildning, Arbetslivserfarenhet"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleAddSection}>Lägg till</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            
+            <SectionsList />
+          </CustomTabsContent>
+          <CustomTabsContent value="templates" className="mt-4">
+            <TemplateGallery />
+          </CustomTabsContent>
+          <CustomTabsContent value="settings" className="mt-4">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Inställningar</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">CV-titel</h3>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={cvTitle}
+                      onChange={(e) => setCvTitle(e.target.value)}
+                      placeholder="Ange en titel för ditt CV"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleUpdateTitle}
+                      disabled={cvTitle === originalTitleRef.current}
+                    >
+                      Uppdatera
+                    </Button>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Förhandsgranskning</h3>
+                  <div className="flex items-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowSplitView(!showSplitView)}
+                      className="flex items-center gap-2"
+                    >
+                      <SplitSquareVertical className="h-4 w-4" />
+                      {showSplitView ? "Dölj förhandsgranskning" : "Visa förhandsgranskning"}
+                    </Button>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Mallgalleri</h3>
+                  <Link href="/templates/new" passHref>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Layout className="h-4 w-4" />
+                      Utforska nya mallar
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </CustomTabsContent>
+        </motion.div>
+      </AnimatePresence>
+    </Tabs>
+  )
+
   return (
     <div className="flex flex-col gap-6">
       <motion.div
@@ -137,7 +327,7 @@ export function EnhancedEditor() {
         className="flex items-center justify-between bg-card p-4 rounded-lg shadow-sm border"
       >
         <div className="flex flex-col">
-          <h1 className="text-2xl font-bold">{currentCV?.title || "Nytt CV"}</h1>
+          <h1 className="text-2xl font-bold">{cvTitle || "Nytt CV"}</h1>
           <span className="text-xs text-muted-foreground">
             {isAutoSaving ? 
               <span className="flex items-center gap-1">
@@ -173,165 +363,10 @@ export function EnhancedEditor() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
-        <motion.div 
-          className="lg:col-span-4 bg-card rounded-lg shadow-sm border p-4"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="personal" className="rounded-full">
-                <User className="mr-2 h-4 w-4" />
-                Personuppgifter
-              </TabsTrigger>
-              <TabsTrigger value="sections" className="rounded-full">
-                <Layers className="mr-2 h-4 w-4" />
-                Sektioner
-              </TabsTrigger>
-              <TabsTrigger value="templates" className="rounded-full">
-                <Palette className="mr-2 h-4 w-4" />
-                Mallar
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="rounded-full">
-                <Settings className="mr-2 h-4 w-4" />
-                Inställningar
-              </TabsTrigger>
-            </TabsList>
-            
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <TabsContent value="personal" className="mt-4">
-                  <PersonalInfoForm />
-                </TabsContent>
-                <TabsContent value="sections" className="mt-4">
-                  <div className="mb-4 flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">Sektioner</h2>
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button className="rounded-full">
-                          <Plus className="mr-2 h-4 w-4" />
-                          Lägg till sektion
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Lägg till ny sektion</DialogTitle>
-                          <DialogDescription>Välj typ av sektion och ange en titel.</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="section-type">Typ av sektion</Label>
-                            <Select value={newSectionType} onValueChange={setNewSectionType}>
-                              <SelectTrigger id="section-type">
-                                <SelectValue placeholder="Välj typ" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="education">Utbildning</SelectItem>
-                                <SelectItem value="experience">Erfarenhet</SelectItem>
-                                <SelectItem value="projects">Projekt</SelectItem>
-                                <SelectItem value="skills">Färdigheter</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="section-title">Titel</Label>
-                            <Input
-                              id="section-title"
-                              value={newSectionTitle}
-                              onChange={(e) => setNewSectionTitle(e.target.value)}
-                              placeholder="T.ex. Utbildning, Arbetslivserfarenhet"
-                            />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button onClick={handleAddSection}>Lägg till</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  
-                  <SectionsList />
-                </TabsContent>
-                <TabsContent value="templates" className="mt-4">
-                  <TemplateGallery />
-                </TabsContent>
-                <TabsContent value="settings" className="mt-4">
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold">Inställningar</h2>
-                    <div className="flex flex-col gap-4">
-                      <div>
-                        <h3 className="text-sm font-medium mb-2">CV-titel</h3>
-                        <Input 
-                          value={currentCV?.title || ""} 
-                          onChange={(e) => {
-                            if (currentCV) {
-                              saveCV({
-                                ...currentCV,
-                                title: e.target.value
-                              })
-                            }
-                          }}
-                          placeholder="Ange en titel för ditt CV"
-                        />
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-sm font-medium mb-2">Förhandsgranskning</h3>
-                        <div className="flex items-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowSplitView(!showSplitView)}
-                            className="flex items-center gap-2"
-                          >
-                            <SplitSquareVertical className="h-4 w-4" />
-                            {showSplitView ? "Dölj förhandsgranskning" : "Visa förhandsgranskning"}
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-sm font-medium mb-2">Mallgalleri</h3>
-                        <Link href="/templates/new" passHref>
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <Layout className="h-4 w-4" />
-                            Utforska nya mallar
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-              </motion.div>
-            </AnimatePresence>
-          </Tabs>
-        </motion.div>
-        
-        {showSplitView && (
-          <motion.div 
-            className="lg:col-span-3 h-auto"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-          >
-            <div className="sticky top-24">
-              <div className="bg-card rounded-lg shadow-sm border preview-container-wrapper">
-                <div className="preview-zoom-container">
-                  <A4CVPreview className="editor-preview" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </div>
+      {/* Använd vår separerade layout */}
+      <ResizableEditorLayout showSplitView={showSplitView}>
+        {tabsContent}
+      </ResizableEditorLayout>
     </div>
   )
 } 

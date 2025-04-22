@@ -1,7 +1,6 @@
 "use client"
 
 import { useCV } from "@/contexts/CVContext"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PersonalInfoForm } from "@/components/PersonalInfoForm"
 import { SectionsList } from "@/components/SectionsList"
 import { useState } from "react"
@@ -21,14 +20,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { AnimatedButton } from "@/components/animations/AnimatedButton"
 import { FadeIn } from "@/components/animations/FadeIn"
 import { TemplateGallery } from "@/components/templates/TemplateGallery"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { 
+  Card, 
+  CardContent, 
+  CardFooter, 
+  CardHeader 
+} from "@/components/ui/card"
 import { formatDistanceToNow } from "date-fns"
 import { sv } from "date-fns/locale"
+import { Button } from "@/components/ui/button"
+import { ResponsiveNavTabs } from "@/components/ResponsiveNavTabs"
 
 // Denna komponent används för mobila enheter för att ge en optimerad upplevelse
 export function CVEditorMobile() {
@@ -232,35 +236,43 @@ export function CVEditorMobile() {
       </motion.div>
 
       <FadeIn delay={0.1}>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="personal">
-              <User className="mr-2 h-4 w-4" />
-              Personuppgifter
-            </TabsTrigger>
-            <TabsTrigger value="sections">
-              <Layers className="mr-2 h-4 w-4" />
-              Sektioner
-            </TabsTrigger>
-            <TabsTrigger value="templates">
-              <Palette className="mr-2 h-4 w-4" />
-              Mallar
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="personal" className="mt-4">
-            <PersonalInfoForm />
-          </TabsContent>
-          <TabsContent value="sections" className="mt-4">
-            <div className="mb-4 flex justify-between">
-              <h2 className="text-xl font-semibold">Sektioner</h2>
-            </div>
-            <SectionsList />
-          </TabsContent>
-          <TabsContent value="templates" className="mt-4">
-            <h2 className="text-xl font-semibold mb-4">Välj mall</h2>
-            <TemplateGallery />
-          </TabsContent>
-        </Tabs>
+        <ResponsiveNavTabs 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          tabs={[
+            {
+              value: "personal",
+              icon: <User className="h-4 w-4" />,
+              label: "Personuppgifter",
+              content: <PersonalInfoForm />
+            },
+            {
+              value: "sections",
+              icon: <Layers className="h-4 w-4" />,
+              label: "Sektioner",
+              content: (
+                <>
+                  <div className="mb-4 flex justify-between">
+                    <h2 className="text-xl font-semibold">Sektioner</h2>
+                  </div>
+                  <SectionsList />
+                </>
+              )
+            },
+            {
+              value: "templates",
+              icon: <Palette className="h-4 w-4" />,
+              label: "Mallar",
+              content: (
+                <>
+                  <h2 className="text-xl font-semibold mb-4">Välj mall</h2>
+                  <TemplateGallery />
+                </>
+              )
+            }
+          ]}
+          iconOnly={true}
+        />
       </FadeIn>
       
       {/* Fast actions buttons som är fixade längst ner på skärmen */}
