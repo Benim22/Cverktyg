@@ -283,7 +283,9 @@ export function ProjectForm({ sectionId, items = [], isAdding = false }: Project
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId={`projects-${sectionId}`}>
+      <Droppable 
+        droppableId={`projects-${sectionId}`}
+      >
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
             {items.map((item: Project, index) => (

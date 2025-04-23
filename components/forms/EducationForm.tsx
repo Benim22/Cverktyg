@@ -352,7 +352,9 @@ export function EducationForm({ sectionId, items = [], isAdding = false }: Educa
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId={`education-${sectionId}`}>
+      <Droppable 
+        droppableId={`education-${sectionId}`}
+      >
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
             {items.map((item: Education, index) => (

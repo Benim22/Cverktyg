@@ -166,9 +166,6 @@ export function SkillsForm({ sectionId, items = [], isAdding = false }: SkillsFo
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable 
         droppableId={`skills-${sectionId}`}
-        ignoreContainerClipping={false}
-        isDropDisabled={false}
-        isCombineEnabled={false}
       >
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">

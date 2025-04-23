@@ -97,6 +97,11 @@ export interface CV {
   updatedAt: string
   colorScheme?: CVColorScheme
   templateId?: string // Referens till vald mall
+  fontSettings?: {
+    headingFont: string
+    bodyFont: string
+    fontSize: "small" | "medium" | "large"
+  }
 }
 
 // Standardfärger som används som fallback om inget är valt

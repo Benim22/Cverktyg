@@ -2,14 +2,15 @@
 
 import { useCV } from "@/contexts/CVContext"
 import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { StandardLayout } from "@/components/templates/TemplateLayouts"
-import { DEFAULT_COLOR_SCHEME } from "@/types/cv"
+import { DEFAULT_COLOR_SCHEME, CVColorScheme } from "@/types/cv"
 import { CV_TEMPLATES } from "@/data/templates"
 import { usePathname } from "next/navigation"
-import { ZoomIn, ZoomOut, Maximize, X } from "lucide-react"
+import { ZoomIn, ZoomOut, Maximize, X, Edit, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { CVHoverEditor } from "./CVHoverEditor"
 
 interface A4CVPreviewProps {
   className?: string;
@@ -42,8 +43,8 @@ export function A4CVPreview({ className, isStandalone = false, dummyData = null 
           profileImage: null
         }
       };
-      getColorValueFn = (key: string) => {
-        const fallbackColors: Record<string, string> = {
+      getColorValueFn = (key: keyof CVColorScheme) => {
+        const fallbackColors: Record<keyof CVColorScheme, string> = {
           backgroundColor: "#ffffff",
           primaryColor: "#1e293b",
           secondaryColor: "#334155",
@@ -66,6 +67,10 @@ export function A4CVPreview({ className, isStandalone = false, dummyData = null 
   const [scale, setScale] = useState(1)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [isZooming, setIsZooming] = useState(false)
+  const [isEditorVisible, setIsEditorVisible] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeSectionIndex, setActiveSectionIndex] = useState<number | null>(null);
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   
   // Identifiera om vi är i preview-läge eller editor-läge
   const isPreviewMode = pathname?.includes("/preview")
@@ -250,6 +255,9 @@ export function A4CVPreview({ className, isStandalone = false, dummyData = null 
     };
   }, [isFullScreen]);
 
+  // Identifiera om komponenten används i editor-läge
+  const isEditorMode = className?.includes('editor-preview');
+
   if (!cvData) {
     return (
       <div className="flex h-full items-center justify-center p-4">
@@ -260,13 +268,13 @@ export function A4CVPreview({ className, isStandalone = false, dummyData = null 
     )
   }
 
-  // Hjälpfunktion för att hämta färgvärde med fallback
+  // Denna funktion används i component-metoden för att hämta färger
   const getColorValue = (key: string) => {
     try {
-      return getColorValueFn ? getColorValueFn(key) : "#000000";
+      return getColorValueFn ? getColorValueFn(key as keyof CVColorScheme) : "#000000";
     } catch (error) {
       // Fallback-färger om getColorValue inte fungerar
-      const fallbackColors: Record<string, string> = {
+      const fallbackColors: Record<keyof CVColorScheme, string> = {
         backgroundColor: "#ffffff",
         primaryColor: "#1e293b",
         secondaryColor: "#334155",
@@ -275,7 +283,7 @@ export function A4CVPreview({ className, isStandalone = false, dummyData = null 
         textColor: "#334155",
         accentColor: "#c2410c",
       };
-      return fallbackColors[key] || "#000000";
+      return fallbackColors[key as keyof CVColorScheme] || "#000000";
     }
   }
 
@@ -299,116 +307,137 @@ export function A4CVPreview({ className, isStandalone = false, dummyData = null 
     background: profileImage.isTransparent ? 'transparent' : undefined,
   } : {}
 
+  // Lägg till denna funktion efter getColorValue
+  const handleSectionClick = (sectionId: string | null, index: number | null) => {
+    setActiveSection(sectionId);
+    setActiveSectionIndex(index);
+    setIsEditorVisible(!!sectionId);
+  };
+  
+  // Funktion för att kontrollera om en sektion är aktiv (för visuell feedback)
+  const isSectionActive = (sectionId: string) => {
+    return activeSection === sectionId || hoveredSection === sectionId;
+  };
+
+  // Rendrera A4-pappret med korrekt skalning
   return (
     <div 
       ref={containerRef}
-      className={cn(
-        "a4-preview-container w-full", 
-        className,
-        isFullScreen ? "fixed inset-0 z-50 bg-background/95 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto" : ""
-      )}
+      className={cn("relative flex items-center justify-center", className)}
     >
-      {/* Kontrollfält */}
-      <div className={cn(
-        "flex justify-between items-center w-full mb-2 sm:mb-4 px-1",
-        isFullScreen ? "sticky top-0 z-10 bg-background/90 backdrop-blur py-2 rounded-md" : ""
-      )}>
-        <div className="text-xs sm:text-sm text-muted-foreground">
-          {isPreviewMode ? "CV Förhandsvisning" : "Förhandsvisning"}
+      {isFullScreen && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="relative w-full h-full flex items-center justify-center overflow-auto">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-4 right-4 z-10 bg-background/60 hover:bg-background/80 rounded-full"
+              onClick={toggleFullScreen}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <div style={{ transform: `scale(${scale})` }} className="a4-paper">
+              <StandardLayout
+                cv={cvData}
+                profileImageStyle={profileImageStyle}
+                profileImageClass={""}
+                transparentBgStyle={{}}
+              />
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2">
+      )}
+      
+      <div 
+        className={cn(
+          "a4-paper", 
+          "transition-transform duration-300", 
+          isZooming ? "a4-zoom-in" : ""
+        )}
+        style={{ transform: `scale(${scale})` }}
+      >
+        {/* Editor-toggle knapp - visa endast i editor-läge */}
+        {isEditorMode && !isFullScreen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-background/70 hover:bg-background/90 shadow-sm"
+            onClick={() => setIsEditorVisible(!isEditorVisible)}
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </Button>
+        )}
+
+        {/* Endast tillåt redigering i editor-läge */}
+        {isEditorMode && (
+          <AnimatePresence>
+            <CVHoverEditor 
+              visible={isEditorVisible}
+              activeSection={activeSection}
+              activeSectionIndex={activeSectionIndex}
+              onSectionClick={handleSectionClick}
+            />
+          </AnimatePresence>
+        )}
+        
+        <StandardLayout
+          cv={cvData}
+          profileImageStyle={profileImageStyle}
+          profileImageClass={""}
+          transparentBgStyle={{}}
+          onSectionClick={isEditorMode ? handleSectionClick : undefined}
+          activeSectionId={activeSection}
+        />
+      </div>
+      
+      {/* Kontrollpanel med zoom och helskärm, visa endast i preview-läge, inte i editor-läge */}
+      {!isEditorMode && (
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 p-1 bg-background/90 backdrop-blur-sm rounded-full shadow-md">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 sm:h-8 sm:w-8" 
+            className="h-8 w-8 rounded-full" 
             onClick={() => handleZoom(false)}
             title="Zooma ut"
-            disabled={scale <= 0.31}
+            disabled={scale <= 0.3}
           >
             <ZoomOut className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
+          <span className="text-xs px-1 sm:px-2 text-muted-foreground select-none">
+            {Math.round(scale * 100)}%
+          </span>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 sm:h-8 sm:w-8" 
+            className="h-8 w-8 rounded-full" 
             onClick={() => handleZoom(true)}
             title="Zooma in"
             disabled={scale >= calculateMaxZoom() * 0.99}
           >
             <ZoomIn className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
-          {isFullScreen ? (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 hover:text-red-600" 
-              onClick={toggleFullScreen}
-              title="Stäng helskärm"
-            >
-              <X className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          ) : (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-6 w-6 sm:h-8 sm:w-8" 
-              onClick={toggleFullScreen}
-              title="Öppna helskärm"
-            >
-              <Maximize className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
-      
-      {/* A4-container med transformation för skalning */}
-      <div 
-        className={cn(
-          "relative flex justify-center w-full overflow-visible",
-          isZooming ? "a4-zoom-in" : ""
-        )}
-        style={{ 
-          transformOrigin: 'top center',
-          transform: `scale(${scale})`,
-          transition: 'transform 0.2s ease',
-          margin: "0 auto",
-          height: "auto" // Tillåt att expandera om innehållet är större
-        }}
-      >
-        <motion.div 
-          className="motion-div relative flex justify-center"
-          style={{ 
-            width: `${A4_WIDTH_MM * 3.7795}px`,
-            minHeight: `${A4_HEIGHT_MM * 3.7795}px`,
-            height: "auto", // Viktigt: Tillåt att expandera vid behov
-          }}
-        >
-          {/* Använd div istället för Card för att undvika extra border-styles */}
-          <div 
-            className="a4-cv-container w-full overflow-visible"
-            data-page-mode={isPreviewMode ? 'preview' : 'editor'}
-            style={{ 
-              backgroundColor: getColorValue("backgroundColor"),
-              ...fontStyles,
-            }}
+          <div className="h-3 w-px bg-border mx-1"></div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full" 
+            onClick={toggleFullScreen}
+            title="Helskärm"
           >
-            {/* Använd alltid StandardLayout */}
-            <StandardLayout 
-              cv={cvData} 
-              profileImageStyle={profileImageStyle} 
-              profileImageClass={""} 
-              transparentBgStyle={{}}
-            />
-          </div>
-        </motion.div>
-      </div>
+            <Maximize className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        </div>
+      )}
       
-      {/* Information om skalning */}
-      <div className="mt-1 sm:mt-2 text-xs text-muted-foreground text-center">
-        {Math.round(scale * 100)}% • A4-format 
-        {isPreviewMode && <span>• Din export kommer att behålla denna zoomnivå</span>}
-        {scale >= calculateMaxZoom() * 0.99 && <span className="text-amber-500 ml-1">• Max zoom</span>}
-      </div>
+      {/* Status-information för skalan, även detta bör endast visas i preview-läge */}
+      {isPreviewMode && scale > 0.4 && (
+        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 flex flex-wrap justify-center">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {isPreviewMode && <span>• Din export kommer att behålla denna zoomnivå</span>}
+            {scale >= calculateMaxZoom() * 0.99 && <span className="text-amber-500 ml-1">• Max zoom</span>}
+          </span>
+        </div>
+      )}
     </div>
   )
 } 

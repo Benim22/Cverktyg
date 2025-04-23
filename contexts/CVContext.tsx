@@ -32,6 +32,7 @@ interface CVContextType {
   isAutoSaving: boolean
   zoomScale: number
   setZoomScale: (scale: number) => void
+  updateFontSettings: (fontSettings: Partial<CV['fontSettings']>) => void
 }
 
 const CVContext = createContext<CVContextType | undefined>(undefined)
@@ -470,6 +471,21 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
     }
   }
 
+  const updateFontSettings = (fontSettings: Partial<CV['fontSettings']>) => {
+    setCurrentCV(prev => {
+      if (!prev) return prev;
+      
+      return {
+        ...prev,
+        fontSettings: {
+          ...prev.fontSettings,
+          ...fontSettings
+        },
+        updatedAt: new Date().toISOString()
+      };
+    });
+  };
+
   return (
     <CVContext.Provider
       value={{
@@ -493,7 +509,8 @@ export function CVProvider({ children, initialCV }: { children: ReactNode; initi
         lastSaveTime,
         isAutoSaving,
         zoomScale,
-        setZoomScale
+        setZoomScale,
+        updateFontSettings
       }}
     >
       {children}

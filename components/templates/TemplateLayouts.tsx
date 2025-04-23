@@ -10,10 +10,19 @@ interface TemplateLayoutProps {
   profileImageStyle?: React.CSSProperties;
   profileImageClass?: string;
   transparentBgStyle?: React.CSSProperties;
+  onSectionClick?: (sectionId: string, index: number) => void;
+  activeSectionId?: string | null;
 }
 
 // Standard layout - Traditionell layout
-export function StandardLayout({ cv, profileImageStyle, profileImageClass, transparentBgStyle }: TemplateLayoutProps) {
+export function StandardLayout({ 
+  cv, 
+  profileImageStyle, 
+  profileImageClass, 
+  transparentBgStyle,
+  onSectionClick,
+  activeSectionId
+}: TemplateLayoutProps) {
   const { getColorValue } = useCV()
   const { personalInfo, sections } = cv
   const profileImage = personalInfo?.profileImage
@@ -26,6 +35,11 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
       : 'none',
     background: profileImage.isTransparent ? 'transparent' : undefined,
   } : {})
+
+  // Funktion för att kontrollera om en sektion är aktiv
+  const isSectionActive = (sectionId: string) => {
+    return activeSectionId === sectionId;
+  };
 
   return (
     <div className="h-full p-4 sm:p-8 overflow-visible" style={{ height: 'auto', minHeight: '100%' }}>
@@ -109,8 +123,18 @@ export function StandardLayout({ cv, profileImageStyle, profileImageClass, trans
         {sections.map((section, index) => (
           <div
             key={section.id}
-            className="mt-4 sm:mt-6 border-b border-gray-200 pb-4 sm:pb-6 last:border-0 cv-section"
+            className={`mt-4 sm:mt-6 border-b border-gray-200 pb-4 sm:pb-6 last:border-0 cv-section relative group ${isSectionActive(section.id) ? 'ring-1 ring-primary/40 bg-primary/5 rounded-sm' : ''}`}
+            onClick={() => onSectionClick && onSectionClick(section.id, index)}
+            style={{ 
+              cursor: onSectionClick ? 'pointer' : 'default',
+              transition: 'all 0.2s ease' 
+            }}
           >
+            {/* Visa hover-effekt endast om onSectionClick finns */}
+            {onSectionClick && (
+              <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-sm"></div>
+            )}
+            
             <h2 
               className="mb-3 sm:mb-4 text-lg sm:text-xl font-semibold cv-section-title"
               style={{ color: getColorValue("headingColor") }}

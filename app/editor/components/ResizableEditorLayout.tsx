@@ -36,7 +36,7 @@ export function ResizableEditorLayout({ children, showSplitView }: ResizableEdit
       <ResizableHandle withHandle />
       
       <ResizablePanel defaultSize={35} minSize={30} className="bg-card">
-        <div className="h-full flex items-center justify-center overflow-hidden">
+        <div className="h-full flex items-center justify-center overflow-hidden relative">
           <div className="preview-zoom-container p-4 h-full w-full flex items-center justify-center">
             <A4CVPreview className="editor-preview" />
           </div>

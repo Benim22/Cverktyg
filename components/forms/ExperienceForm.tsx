@@ -297,7 +297,9 @@ export function ExperienceForm({ sectionId, items = [], isAdding = false }: Expe
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId={`experience-${sectionId}`}>
+      <Droppable 
+        droppableId={`experience-${sectionId}`}
+      >
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
             {items.map((item: Experience, index) => (
