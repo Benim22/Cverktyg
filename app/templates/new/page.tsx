@@ -8,8 +8,9 @@ import { AnimatedButton } from "@/components/animations/AnimatedButton"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
-import { useCV } from "@/contexts/CVContext"
+import { useCV, CVProvider } from "@/contexts/CVContext"
 import { useState } from "react"
+import defaultCV from "@/data"
 
 // Templatemallarna
 const templates = [
@@ -33,7 +34,17 @@ const templates = [
   },
 ]
 
-export default function TemplatesPage() {
+// Wrapper-komponent som omsluter med CVProvider
+export default function TemplatesPageWrapper() {
+  return (
+    <CVProvider initialCV={defaultCV}>
+      <TemplatesPage />
+    </CVProvider>
+  );
+}
+
+// Huvudkomponenten som använder useCV
+function TemplatesPage() {
   const { currentCV, setTemplate, saveCV } = useCV()
   const [selectedTemplate, setSelectedTemplate] = useState("")
   const [isApplying, setIsApplying] = useState(false)

@@ -16,7 +16,7 @@ import { motion } from "framer-motion"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import defaultCV from "@/data/defaultCV"
+import defaultCV from "@/data"
 
 export default function TemplateDetailWrapper({ params }: { params: { id: string } }) {
   // Använd React.use för att hantera params som ett Promise

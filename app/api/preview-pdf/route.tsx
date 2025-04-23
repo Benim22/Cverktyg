@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CV_TEMPLATES } from '@/data/templates';
-import defaultCV from '@/data/defaultCV';
+import defaultCV from '@/data';
 
 /**
  * API-rutt för att förhandsgranska PDF-mallar

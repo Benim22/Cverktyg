@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PDFDownloadLink } from "@react-pdf/renderer"
 import { FileText } from "lucide-react"
-import defaultCV from "@/data/defaultCV"
+import defaultCV from "@/data"
 
 // Importera våra nya mallar
 import { CVTemplates } from "@/app/templates/pdf"

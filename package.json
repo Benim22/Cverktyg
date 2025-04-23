@@ -64,7 +64,7 @@
     "next": "15.2.4",
     "next-auth": "^4.24.11",
     "next-themes": "latest",
-    "puppeteer": "^19.11.1",
+    "puppeteer": "^24.7.1",
     "react": "^19",
     "react-beautiful-dnd": "latest",
     "react-confetti": "^6.4.0",
