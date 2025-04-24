@@ -18,6 +18,16 @@ export default function NewCVPage() {
       try {
         setLoading(true)
         
+        // Kontrollera om vi redan har skapat ett CV i denna session
+        const createInProgress = sessionStorage.getItem('cv_create_in_progress')
+        if (createInProgress === 'true') {
+          console.log('CV-skapande redan pågår, avbryter för att undvika dubbletter')
+          return
+        }
+        
+        // Sätt en flagga för att förhindra dubbla CV-skapanden
+        sessionStorage.setItem('cv_create_in_progress', 'true')
+        
         // Hämta användarens session
         const supabase = getSupabaseClient()
         const { data: { session } } = await supabase.auth.getSession()
@@ -82,18 +92,28 @@ export default function NewCVPage() {
           return
         }
         
+        // Rensa flaggan när vi är klara
+        sessionStorage.removeItem('cv_create_in_progress')
+        
         // Redirect till CV-redigeraren
         router.push(`/editor/${newCVId}`)
       } catch (error) {
         console.error("Fel vid skapande av CV:", error)
         toast.error("Ett fel uppstod när CV:t skulle skapas")
         router.push("/dashboard")
+        // Rensa flaggan vid fel
+        sessionStorage.removeItem('cv_create_in_progress')
       } finally {
         setLoading(false)
       }
     }
     
     createNewCV()
+    
+    // Lägg till en cleanup-funktion som tar bort flaggan om komponenten avmonteras
+    return () => {
+      sessionStorage.removeItem('cv_create_in_progress')
+    }
   }, [router])
   
   return (

@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Check, ChevronDown, FileText, HelpCircle, Layout, LogOut, Moon, Settings, Sun, User } from "lucide-react"
+import { Check, ChevronDown, FileText, HelpCircle, Layout, LogOut, Moon, Settings, Sun, User, Briefcase } from "lucide-react"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -160,11 +160,18 @@ export function Navbar() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               {user && (
-                <NavigationMenuItem>
-                  <Link href="/dashboard" legacyBehavior passHref>
-                    <NavigationMenuLink className={customNavLinkStyle}>Mina CV:n</NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
+                <>
+                  <NavigationMenuItem>
+                    <Link href="/dashboard" legacyBehavior passHref>
+                      <NavigationMenuLink className={customNavLinkStyle}>Mina CV:n</NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link href="/recommended-jobs" legacyBehavior passHref>
+                      <NavigationMenuLink className={customNavLinkStyle}>Rekommenderade jobb</NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                </>
               )}
             </NavigationMenuList>
           </NavigationMenu>
@@ -232,6 +239,12 @@ export function Navbar() {
                   <Link href="/dashboard" className="flex items-center">
                     <FileText className="mr-2 h-4 w-4" />
                     Mina CV:n
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/recommended-jobs" className="flex items-center">
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    Rekommenderade jobb
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

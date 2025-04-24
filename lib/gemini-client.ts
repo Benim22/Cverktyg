@@ -259,22 +259,21 @@ export async function improveSummary(
     ${summary}
     
     Förbättra denna sammanfattning genom att:
-    - Skapa en stark inledande mening som fångar uppmärksamhet och tydligt definierar kandidatens yrkesidentitet
-    - Betona specifika nyckelkompetenser och expertisområden som är relevanta för yrkesrollen
-    - Lyfta fram konkreta prestationer och resultat med siffror när möjligt (t.ex. "förbättrat processeffektiviteten med 30%")
-    - Inkludera relevant erfarenhet och antalet år inom branschen för att understryka expertis
-    - Nämna särskiljande egenskaper som gör kandidaten unik (specialistkunskaper, certifieringar, etc.)
-    - Avsluta med en tydlig formulering av vad kandidaten kan bidra med till en arbetsgivare
-    - Begränsa till 3-5 meningar eller max 2 korta stycken (totalt 6-8 rader)
-    - Ge ett modernt och professionellt intryck som är anpassat till svensk arbetsmarknad
+    - Skapa en utförlig bakgrundsbeskrivning om personen och deras professionella identitet
+    - Fokusera på bakgrund, erfarenhet, kompetensområden och värdefulla färdigheter
+    - Uttrycka detta i 3-4 meningar som flyter bra ihop
+    - Hålla texten professionell men personlig
+    - Begränsa texten till max 800 tecken men gärna minst 500 tecken
     
-    VIKTIG INSTRUKTION: Om det saknas specifik information:
-    - Fokusera på det som faktiskt nämns i den ursprungliga texten
-    - Undvik klichéer och generiska beskrivningar (som endast "driven" eller "passionerad")
-    - Undvik att hitta på kompetenser eller erfarenheter som inte nämndes i originaltexten
-    - Skapa en sammanfattning som känns personlig och unik, inte en generisk mall
+    VIKTIG INSTRUKTION:
+    - Beskriv utförligt personens bakgrund, erfarenhet och färdigheter
+    - Inkludera specifika kompetenser och expertisområden
+    - Använd information som nämns i den ursprungliga texten och utveckla den
+    - Utelämna karriärmål, ambitioner och framtidsplaner
+    - Undvik klichéer och generiska beskrivningar
+    - Skapa en sammanfattning som känns personlig och informativ
     
-    Ge en sammanhängande text i korta, kraftfulla meningar som flyter naturligt. Använd radbrytningar mellan styckena.
+    Ge en informativ text på 500-800 tecken som effektivt summerar personens professionella bakgrund, erfarenheter och kompetenser.
     Språket ska vara svenska och ha en professionell ton.
     `
 
@@ -288,16 +287,24 @@ export async function improveSummary(
       }],
       generationConfig: {
         temperature: 0.4,
-        maxOutputTokens: 800
+        maxOutputTokens: 600
       }
     })
 
     const response = result.response
-    // Bearbeta svaret för att säkerställa att stycken hamnar på separata rader
     let formattedText = response.text().trim()
     
-    // Säkerställ radbrytningar mellan stycken
-    formattedText = formattedText.replace(/([.!?])\s+([A-ZÅÄÖ])/g, "$1\n\n$2");
+    // Begränsa texten till ca 800 tecken om den är längre
+    if (formattedText.length > 820) {
+      // Hitta sista punkten innan 800 tecken och trimma där
+      const cutoff = formattedText.lastIndexOf('.', 800)
+      if (cutoff > 700) {  // Om det finns en punkt inom rimligt avstånd
+        formattedText = formattedText.substring(0, cutoff + 1)
+      } else {
+        // Annars ta de första 800 tecknen och avsluta med ...
+        formattedText = formattedText.substring(0, 797) + '...'
+      }
+    }
     
     return formattedText
 

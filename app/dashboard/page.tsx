@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [showPaywall, setShowPaywall] = useState(false)
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [cvToShare, setCvToShare] = useState<{id: string, isPublic: boolean} | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [cvToDelete, setCvToDelete] = useState<string | null>(null)
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -98,6 +100,7 @@ export default function DashboardPage() {
       } else {
         setCvs(cvs.filter(cv => cv.id !== cvId))
         toast.success("CV:t har tagits bort")
+        setDeleteDialogOpen(false)
       }
     } catch (error) {
       console.error("Fel vid borttagning av CV:", error)
@@ -180,6 +183,11 @@ export default function DashboardPage() {
       console.error("Fel vid namnbyte:", error)
       toast.error("Ett fel uppstod")
     }
+  }
+  
+  const initiateDelete = (cvId: string) => {
+    setCvToDelete(cvId)
+    setDeleteDialogOpen(true)
   }
   
   if (loading) {
@@ -266,15 +274,11 @@ export default function DashboardPage() {
                         >
                           <Share2 className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" asChild>
-                          <Link href={`/editor/${cv.id}`}>
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                        </Button>
                         <Button 
                           variant="outline" 
                           size="icon"
-                          onClick={() => handleDeleteCV(cv.id)}
+                          onClick={() => initiateDelete(cv.id)}
+                          title="Ta bort"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -288,6 +292,7 @@ export default function DashboardPage() {
         </div>
       </PageTransition>
       
+      {/* Dialog för att byta namn på ett CV */}
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -329,6 +334,34 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
       
+      {/* Dialog för att radera ett CV */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Bekräfta borttagning</DialogTitle>
+            <DialogDescription>
+              Är du säker på att du vill ta bort detta CV? Detta kan inte ångras och du kommer att förlora all information i CV:t permanent.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              className="sm:flex-1"
+            >
+              Avbryt
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => cvToDelete && handleDeleteCV(cvToDelete)}
+              className="sm:flex-1"
+            >
+              Ja, ta bort permanent
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Paywall Modal för CV-begränsning */}
       <PaywallModal 
         isOpen={showPaywall}

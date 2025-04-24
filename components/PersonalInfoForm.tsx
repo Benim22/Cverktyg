@@ -114,7 +114,7 @@ export function PersonalInfoForm() {
       
       toast({
         title: "Sammanfattning förbättrad",
-        description: "Din sammanfattning har förbättrats med AI",
+        description: "Din sammanfattning har förbättrats med AI och gjorts mer utförlig (ca 500-800 tecken)",
       })
     } catch (error) {
       console.error("Fel vid förbättring av sammanfattning:", error);
@@ -273,7 +273,7 @@ export function PersonalInfoForm() {
                           ) : (
                             <>
                               <Sparkles className="h-3.5 w-3.5" />
-                              Förbättra med AI
+                              Utförlig bakgrund med AI
                             </>
                           )}
                         </Button>
@@ -286,8 +286,7 @@ export function PersonalInfoForm() {
                         />
                       </FormControl>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Tips: Inkludera din bakgrund, expertisområden, och vad du kan bidra med. Håll det koncist och relevant.
-                        Exempel: "Erfaren webbutvecklare med 5 års erfarenhet av att skapa användarvänliga applikationer med React och Node.js. Specialiserad på e-handelslösningar med fokus på prestanda och användarvänlighet."
+                        Tips: Inkludera din bakgrund och expertisområden. När du använder "Utförlig bakgrund med AI" genereras en informativ sammanfattning (ca 500-800 tecken) som fokuserar på din professionella bakgrund och kompetenser.
                       </p>
                       <FormMessage />
                     </FormItem>

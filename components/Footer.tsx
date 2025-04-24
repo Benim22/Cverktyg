@@ -86,6 +86,9 @@ export function Footer() {
               <Link href="/dashboard" className="text-muted-foreground hover:text-primary text-sm transition-colors">
                 Skapa ett CV
               </Link>
+              <Link href="/recommended-jobs" className="text-muted-foreground hover:text-primary text-sm transition-colors">
+                Rekommenderade jobb
+              </Link>
               <Link href="/resources" className="text-muted-foreground hover:text-primary text-sm transition-colors">
                 Karriärresurser
               </Link>
